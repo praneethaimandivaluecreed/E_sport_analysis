@@ -57,11 +57,6 @@ E_sport_analysis/
 │   ├── quality_issues/
 │   ├── quarantined/
 │   └── sql_analytics/
-│
-|
-|
-├── tests/
-└
 ```
 
 ## 4. Input Datasets
