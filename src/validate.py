@@ -5,141 +5,117 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
 
-# ============================================================
-# COMMON VALIDATION HELPERS
-# ============================================================
-
-def count_rows(df: DataFrame) -> int:
-    """Return the number of rows in a DataFrame."""
+# Count the number of rows in a DataFrame
+def count_rows(df):
     return df.count()
 
 
-def find_duplicate_keys(df: DataFrame, key_columns: list) -> DataFrame:
-    """
-    Find duplicate business keys.
-
-    This identifies duplicated key combinations but does not
-    delete any rows.
-    """
+# Find rows with duplicate values in the given key columns
+def find_duplicate_keys(df, key_columns):
     duplicate_keys = (
         df.groupBy(*key_columns)
         .count()
         .filter(F.col("count") > 1)
+        .drop("count")
     )
 
-    # Return every original row whose key is duplicated.
-    return df.join(
-        duplicate_keys.select(*key_columns),
-        on=key_columns,
-        how="inner"
-    )
+    # Return all rows that contain duplicate keys
+    return df.join(duplicate_keys, on=key_columns, how="inner")
 
 
-def find_missing_values(
-    df: DataFrame,
-    columns: list,
-    dataset_name: str
-) -> DataFrame:
-    """
-    Find rows where one or more selected columns are NULL,
-    empty strings, or whitespace-only strings.
-    """
-    missing_condition = reduce(
-        lambda condition, column: condition | (
+# Find rows with NULL, empty, or whitespace-only values
+def find_missing_values(df, columns, dataset_name):
+    missing_condition = None
+
+    for column in columns:
+        condition = (
             F.col(column).isNull()
-            | (F.trim(F.col(column)) == "")
-        ),
-        columns,
-        F.lit(False)
-    )
+            | (F.trim(F.col(column).cast("string")) == "")
+        )
 
+        if missing_condition is None:
+            missing_condition = condition
+        else:
+            missing_condition = missing_condition | condition
+
+    # Keep rows where at least one checked column is missing
     return (
         df.filter(missing_condition)
-        .withColumn(
-            "validation_issue",
-            F.lit(f"MISSING_REQUIRED_VALUE: {dataset_name}")
-        )
+        .withColumn("validation_issue", F.lit(f"{dataset_name}: missing values"))
     )
 
 
+# Find values that could not be converted to the expected numeric type
 def find_invalid_numeric_values(
-    df: DataFrame,
-    raw_column: str,
-    parsed_column: str,
-    allow_null: bool = False
-) -> DataFrame:
-    """
-    Find non-empty source values that failed numeric parsing.
+    df,
+    raw_column,
+    parsed_column,
+    allow_null=False
+):
+    raw_value = F.trim(F.col(raw_column).cast("string"))
 
-    This checks parsing only. Numeric business rules, such as
-    negative kills, are checked separately.
-    """
-    raw_value = F.trim(F.col(raw_column))
-
-    condition = (
-        F.col(parsed_column).isNull()
-        & F.col(raw_column).isNotNull()
+    # Ignore missing values because they are checked separately
+    invalid_condition = (
+        raw_value.isNotNull()
         & (raw_value != "")
+        & F.col(parsed_column).isNull()
     )
 
     if allow_null:
-        condition = (
-            condition
-            & (~raw_value.isin("unknown", "n/a", "-", "??"))
+        # Ignore common placeholders when NULL values are allowed
+        placeholders = ["unknown", "n/a", "-", "??"]
+
+        invalid_condition = invalid_condition & (
+            F.lower(raw_value).isin(placeholders) == False
         )
 
     return (
-        df.filter(condition)
+        df.filter(invalid_condition)
         .withColumn(
             "validation_issue",
-            F.lit(f"UNPARSEABLE_NUMERIC: {raw_column}")
+            F.lit(f"Invalid numeric value in {raw_column}")
         )
     )
 
 
-def find_invalid_timestamp_values(
-    df: DataFrame,
-    raw_column: str,
-    parsed_column: str
-) -> DataFrame:
-    """Find non-empty timestamp strings that failed parsing."""
+# Find timestamps that could not be parsed
+def find_invalid_timestamp_values(df, raw_column, parsed_column):
+    raw_value = F.trim(F.col(raw_column).cast("string"))
+
+    invalid_condition = (
+        raw_value.isNotNull()
+        & (raw_value != "")
+        & F.col(parsed_column).isNull()
+    )
+
     return (
-        df.filter(
-            F.col(parsed_column).isNull()
-            & F.col(raw_column).isNotNull()
-            & (F.trim(F.col(raw_column)) != "")
-        )
+        df.filter(invalid_condition)
         .withColumn(
             "validation_issue",
-            F.lit(f"UNPARSEABLE_TIMESTAMP: {raw_column}")
+            F.lit(f"Invalid timestamp in {raw_column}")
         )
     )
 
 
-def show_issue_summary(issue_frames: dict) -> None:
-    """Print the number of rows flagged by each validation check."""
-    print("\n" + "=" * 65)
-    print("VALIDATION ISSUE SUMMARY")
-    print("=" * 65)
+# Display the number of rows found by each validation check
+def show_issue_summary(issue_frames):
+    print("\nVALIDATION SUMMARY")
 
     for issue_name, issue_df in issue_frames.items():
-        print(f"{issue_name}: {issue_df.count()} rows flagged")
+        print(f"{issue_name}: {issue_df.count()} issue rows")
 
 
-# ============================================================
-# INDIVIDUAL DATASET VALIDATIONS
-# ============================================================
-
-def validate_teams(teams: DataFrame) -> dict:
+# Validate teams.csv
+def validate_teams(teams):
     issues = {}
 
-    # team_id should identify one team.
+    # Check for duplicate team IDs
     issues["duplicate_team_ids"] = find_duplicate_keys(
         teams, ["team_id"]
     )
 
-    # Missing coach is allowed; team identity fields are required.
-    issues["missing_team_identity"] = find_missing_values(
+    # Check required team information
+    issues["missing_team_values"] = find_missing_values(
         teams,
         ["team_id", "team_name"],
         "teams"
@@ -148,78 +124,83 @@ def validate_teams(teams: DataFrame) -> dict:
     return issues
 
 
-def validate_players(players: DataFrame) -> dict:
+# Validate players.csv
+def validate_players(players):
     issues = {}
 
+    # Check for duplicate player IDs
     issues["duplicate_player_ids"] = find_duplicate_keys(
         players, ["player_id"]
     )
 
-    issues["missing_player_identity"] = find_missing_values(
+    # Check required player information
+    issues["missing_player_values"] = find_missing_values(
         players,
         ["player_id", "player_name"],
         "players"
     )
 
-    # A player may have a missing role, but flag it for review.
-    issues["missing_player_role"] = (
-        players.filter(
-            F.col("role").isNull() | (F.trim(F.col("role")) == "")
-        )
-        .withColumn(
-            "validation_issue",
-            F.lit("MISSING_PLAYER_ROLE")
-        )
+    # Check whether player roles are missing
+    issues["missing_player_roles"] = find_missing_values(
+        players,
+        ["role"],
+        "players"
     )
 
-    # A bad date should be flagged, not silently replaced.
-    issues["invalid_player_join_date"] = (
-        players.filter(F.col("parsed_join_date").isNull())
+    # Check whether join dates could not be parsed
+    issues["invalid_player_join_dates"] = (
+        players.filter(
+            F.col("join_date").isNotNull()
+            & (F.trim(F.col("join_date").cast("string")) != "")
+            & F.col("parsed_join_date").isNull()
+        )
         .withColumn(
             "validation_issue",
-            F.lit("INVALID_PLAYER_JOIN_DATE")
+            F.lit("Invalid player join date")
         )
     )
 
     return issues
 
 
-def validate_matches(matches: DataFrame) -> dict:
+# Validate matches.csv
+def validate_matches(matches):
     issues = {}
 
+    # Check for duplicate match IDs
     issues["duplicate_match_ids"] = find_duplicate_keys(
         matches, ["match_id"]
     )
 
-    issues["missing_match_identity"] = find_missing_values(
+    # Check required match information
+    issues["missing_match_values"] = find_missing_values(
         matches,
         ["match_id", "team_a_id", "team_b_id", "game"],
         "matches"
     )
 
-    issues["invalid_match_timestamps"] = (
-        find_invalid_timestamp_values(
-            matches,
-            "match_time",
-            "parsed_match_time"
-        )
+    # Check whether match times could not be parsed
+    issues["invalid_match_times"] = find_invalid_timestamp_values(
+        matches,
+        "match_time",
+        "parsed_match_time"
     )
 
-    issues["invalid_team_a_scores"] = (
-        find_invalid_numeric_values(
-            matches, "team_a_score", "team_a_score_int"
-        )
+    # Check whether either team's score could not be parsed
+    issues["invalid_team_a_scores"] = find_invalid_numeric_values(
+        matches,
+        "team_a_score",
+        "team_a_score_int"
     )
 
-    issues["invalid_team_b_scores"] = (
-        find_invalid_numeric_values(
-            matches, "team_b_score", "team_b_score_int"
-        )
+    issues["invalid_team_b_scores"] = find_invalid_numeric_values(
+        matches,
+        "team_b_score",
+        "team_b_score_int"
     )
 
-    # A team cannot play against itself in a normal match.
-    # This flags the row; it does not remove it.
-    issues["same_team_on_both_sides"] = (
+    # A team should not play against itself
+    issues["same_team_in_match"] = (
         matches.filter(
             F.col("team_a_id").isNotNull()
             & F.col("team_b_id").isNotNull()
@@ -227,132 +208,177 @@ def validate_matches(matches: DataFrame) -> dict:
         )
         .withColumn(
             "validation_issue",
-            F.lit("SAME_TEAM_ON_BOTH_SIDES")
+            F.lit("Both teams have the same team ID")
         )
     )
 
-    # Negative scores are numeric but invalid under this rule.
-    issues["negative_scores"] = (
-        matches.filter(
-            (F.col("team_a_score_int") < 0)
-            | (F.col("team_b_score_int") < 0)
-        )
+    # Scores cannot be negative
+    issues["negative_team_a_scores"] = (
+        matches.filter(F.col("team_a_score_int") < 0)
         .withColumn(
             "validation_issue",
-            F.lit("NEGATIVE_SCORE")
+            F.lit("Negative team A score")
+        )
+    )
+
+    issues["negative_team_b_scores"] = (
+        matches.filter(F.col("team_b_score_int") < 0)
+        .withColumn(
+            "validation_issue",
+            F.lit("Negative team B score")
         )
     )
 
     return issues
 
 
-def validate_player_match_stats(stats: DataFrame) -> dict:
+# Validate player_match_stats.csv
+def validate_player_match_stats(stats):
     issues = {}
 
+    # Check for duplicate stat IDs
     issues["duplicate_stat_ids"] = find_duplicate_keys(
         stats, ["stat_id"]
     )
 
-    # Expected grain: one row per player per match.
-    issues["duplicate_player_match_combinations"] = (
-        find_duplicate_keys(stats, ["match_id", "player_id"])
+    # Each player should have at most one stats record per match
+    issues["duplicate_player_match_stats"] = find_duplicate_keys(
+        stats, ["match_id", "player_id"]
     )
 
-    issues["missing_stat_identity"] = find_missing_values(
+    # Check required identifiers
+    issues["missing_stats_keys"] = find_missing_values(
         stats,
         ["stat_id", "match_id", "player_id"],
         "player_match_stats"
     )
 
+    # Check whether numeric statistics could not be parsed
     numeric_columns = [
         ("kills", "kills_int"),
         ("deaths", "deaths_int"),
         ("assists", "assists_int"),
         ("damage", "damage_int"),
-        ("rounds_played", "rounds_played_int"),
+        ("rounds_played", "rounds_played_int")
     ]
 
-    # Keep parsing problems separate by source field.
     for raw_column, parsed_column in numeric_columns:
-        issues[f"unparseable_{raw_column}"] = (
-            find_invalid_numeric_values(
-                stats, raw_column, parsed_column
-            )
+        issues[f"invalid_{raw_column}"] = find_invalid_numeric_values(
+            stats,
+            raw_column,
+            parsed_column
         )
 
-    # A negative kill count is numeric but violates a business rule.
+    # Kills cannot be negative
     issues["negative_kills"] = (
         stats.filter(F.col("kills_int") < 0)
         .withColumn(
             "validation_issue",
-            F.lit("FLAGGED_NEGATIVE_KILLS")
+            F.lit("Negative kills")
         )
     )
 
-    for column in ["deaths_int", "assists_int", "damage_int",
-                   "rounds_played_int"]:
+    # Other numeric statistics cannot be negative
+    for column in [
+        "deaths_int",
+        "assists_int",
+        "damage_int",
+        "rounds_played_int"
+    ]:
         issues[f"negative_{column}"] = (
             stats.filter(F.col(column) < 0)
             .withColumn(
                 "validation_issue",
-                F.lit(f"NEGATIVE_VALUE: {column}")
+                F.lit(f"Negative value in {column}")
             )
         )
 
     return issues
 
 
-def validate_match_events(events: DataFrame) -> dict:
+# Validate match_events.csv
+def validate_match_events(events):
     issues = {}
 
+    # Check for duplicate event IDs
     issues["duplicate_event_ids"] = find_duplicate_keys(
         events, ["event_id"]
     )
 
-    issues["missing_event_identity"] = find_missing_values(
+    # Check required event identifiers
+    issues["missing_event_keys"] = find_missing_values(
         events,
         ["event_id", "match_id"],
         "match_events"
     )
 
-    issues["invalid_event_timestamps"] = (
-        find_invalid_timestamp_values(
-            events,
-            "event_time",
-            "parsed_event_time"
-        )
+    # Check whether event timestamps could not be parsed.
+    # Use the actual column names created by the transformation layer.
+    issues["invalid_event_timestamps"] = find_invalid_timestamp_values(
+        events,
+        "event_time",
+        "parsed_event_time"
     )
 
-    issues["unparseable_event_durations"] = (
-        find_invalid_numeric_values(
-            events,
-            "duration_seconds",
-            "duration_seconds_int"
-        )
+    # Check whether event durations could not be parsed.
+    # The raw duration is duration_seconds and its parsed integer is
+    # duration_seconds_int.
+    issues["invalid_event_durations"] = find_invalid_numeric_values(
+        events,
+        "duration_seconds",
+        "duration_seconds_int"
     )
 
+    # Event duration cannot be negative
     issues["negative_event_durations"] = (
         events.filter(F.col("duration_seconds_int") < 0)
         .withColumn(
             "validation_issue",
-            F.lit("NEGATIVE_EVENT_DURATION")
+            F.lit("Negative event duration")
         )
     )
 
-    # Do not use event duration as the overall match duration.
     return issues
 
 
-# ============================================================
-# CROSS-FILE / REFERENTIAL VALIDATIONS
-# ============================================================
+# Find non-empty IDs that do not exist in the parent dataset
+def find_unknown_references(
+    child_df,
+    child_column,
+    parent_df,
+    parent_column,
+    issue_name
+):
+    # Keep only valid parent IDs for matching
+    parent_keys = (
+        parent_df
+        .select(F.col(parent_column).alias(child_column))
+        .filter(
+            F.col(child_column).isNotNull()
+            & (F.trim(F.col(child_column).cast("string")) != "")
+        )
+        .distinct()
+    )
 
-def validate_references(datasets: dict) -> dict:
-    """
-    Check whether IDs in child datasets exist in parent datasets.
+    # Ignore missing child IDs because missing values are checked separately
+    child_rows = child_df.filter(
+        F.col(child_column).isNotNull()
+        & (F.trim(F.col(child_column).cast("string")) != "")
+    )
 
-    These are reference checks only. They do not delete records.
-    """
+    # Find child rows whose IDs are absent from the parent dataset
+    return (
+        child_rows.join(
+            parent_keys,
+            on=child_column,
+            how="left_anti"
+        )
+        .withColumn("validation_issue", F.lit(issue_name))
+    )
+
+
+# Validate relationships between the five datasets
+def validate_references(datasets):
     teams = datasets["teams"]
     players = datasets["players"]
     matches = datasets["matches"]
@@ -361,69 +387,50 @@ def validate_references(datasets: dict) -> dict:
 
     issues = {}
 
-    # Players -> teams
-    known_team_ids = teams.select("team_id").distinct()
-
-    issues["players_with_unknown_team"] = (
-        players.join(known_team_ids, on="team_id", how="left_anti")
-        .withColumn(
-            "validation_issue",
-            F.lit("UNKNOWN_TEAM_ID")
-        )
+    # Check whether each player's team exists
+    issues["players_unknown_teams"] = find_unknown_references(
+        players,
+        "team_id",
+        teams,
+        "team_id",
+        "Player references an unknown team"
     )
 
-    # Matches -> teams (check both participating team columns)
-    issues["matches_with_unknown_team_a"] = (
-        matches.select("match_id", "team_a_id")
-        .join(
-            known_team_ids,
-            F.col("team_a_id") == F.col("team_id"),
-            "left_anti"
-        )
-        .withColumn(
-            "validation_issue",
-            F.lit("UNKNOWN_TEAM_A_ID")
-        )
+    # Check whether team A exists for each match
+    issues["matches_unknown_team_a"] = find_unknown_references(
+        matches,
+        "team_a_id",
+        teams,
+        "team_id",
+        "Match references an unknown team A"
     )
 
-    issues["matches_with_unknown_team_b"] = (
-        matches.select("match_id", "team_b_id")
-        .join(
-            known_team_ids,
-            F.col("team_b_id") == F.col("team_id"),
-            "left_anti"
-        )
-        .withColumn(
-            "validation_issue",
-            F.lit("UNKNOWN_TEAM_B_ID")
-        )
+    # Check whether team B exists for each match
+    issues["matches_unknown_team_b"] = find_unknown_references(
+        matches,
+        "team_b_id",
+        teams,
+        "team_id",
+        "Match references an unknown team B"
     )
 
-    # Stats -> players
-    # PL999 should be unknown if it does not exist in players.csv.
-    known_player_ids = players.select("player_id").distinct()
-
-    issues["stats_with_unknown_player"] = (
-        stats.join(known_player_ids, on="player_id", how="left_anti")
-        .withColumn(
-            "validation_issue",
-            F.lit("UNKNOWN_PLAYER_ID")
-        )
+    # Check whether each stats record references an existing player
+    issues["stats_unknown_players"] = find_unknown_references(
+        stats,
+        "player_id",
+        players,
+        "player_id",
+        "Stats reference an unknown player"
     )
 
-    # Separate: a player exists but has a broken team reference.
-    # This helps distinguish PL006 from an unknown ID like PL999.
+    # Find stats records belonging to players with unknown team IDs
     invalid_team_players = (
-        players.join(
-            known_team_ids,
-            on="team_id",
-            how="left_anti"
-        )
+        issues["players_unknown_teams"]
         .select("player_id")
         .distinct()
     )
 
-    issues["stats_for_players_with_invalid_team"] = (
+    issues["stats_players_with_unknown_teams"] = (
         stats.join(
             invalid_team_players,
             on="player_id",
@@ -431,60 +438,47 @@ def validate_references(datasets: dict) -> dict:
         )
         .withColumn(
             "validation_issue",
-            F.lit("PLAYER_HAS_INVALID_TEAM_REFERENCE")
+            F.lit("Stats belong to a player with an unknown team")
         )
     )
 
-    # Stats -> matches
-    known_match_ids = matches.select("match_id").distinct()
-
-    issues["stats_with_unknown_match"] = (
-        stats.join(known_match_ids, on="match_id", how="left_anti")
-        .withColumn(
-            "validation_issue",
-            F.lit("UNKNOWN_MATCH_ID")
-        )
+    # Check whether each stats record references an existing match
+    issues["stats_unknown_matches"] = find_unknown_references(
+        stats,
+        "match_id",
+        matches,
+        "match_id",
+        "Stats reference an unknown match"
     )
 
-    # Events -> matches
-    issues["events_with_unknown_match"] = (
-        events.join(known_match_ids, on="match_id", how="left_anti")
-        .withColumn(
-            "validation_issue",
-            F.lit("UNKNOWN_MATCH_ID")
-        )
+    # Check whether each event references an existing match
+    issues["events_unknown_matches"] = find_unknown_references(
+        events,
+        "match_id",
+        matches,
+        "match_id",
+        "Event references an unknown match"
     )
 
     return issues
 
 
-# ============================================================
-# RUN ALL VALIDATIONS
-# ============================================================
-
-def validate_all_datasets(datasets: dict) -> dict:
-    """
-    Run dataset-level and cross-file validations.
-
-    Returns DataFrames containing flagged rows. Nothing is dropped.
-    """
+# Run all individual and cross-file validation checks
+def validate_all_datasets(datasets):
     all_issues = {}
 
-    validation_functions = {
-        "teams": validate_teams,
-        "players": validate_players,
-        "matches": validate_matches,
-        "player_match_stats": validate_player_match_stats,
-        "match_events": validate_match_events,
-    }
+    # Validate each dataset independently
+    all_issues.update(validate_teams(datasets["teams"]))
+    all_issues.update(validate_players(datasets["players"]))
+    all_issues.update(validate_matches(datasets["matches"]))
+    all_issues.update(
+        validate_player_match_stats(datasets["player_match_stats"])
+    )
+    all_issues.update(
+        validate_match_events(datasets["match_events"])
+    )
 
-    for dataset_name, validation_function in validation_functions.items():
-        dataset_issues = validation_function(datasets[dataset_name])
-
-        for issue_name, issue_df in dataset_issues.items():
-            all_issues[issue_name] = issue_df
-
-    reference_issues = validate_references(datasets)
-    all_issues.update(reference_issues)
+    # Validate relationships between datasets
+    all_issues.update(validate_references(datasets))
 
     return all_issues
