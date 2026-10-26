@@ -173,30 +173,7 @@ Left anti joins are used to identify unmatched references.
 
 Cleaning additionally distinguishes references to records rejected during upstream cleaning from references to IDs that are entirely unknown.
 
-### 6.5 Cleaning and Quarantine Rules
-
-The cleaning functions in `src/clean.py` apply the following rules.
-
-| Dataset | Implemented cleaning and quarantine rules |
-|---|---|
-| Teams | Quarantines records with missing or blank `team_id` or `team_name`; removes excess exact duplicate rows |
-| Players | Quarantines records with missing or blank `player_id` or `player_name`, and records with invalid team references; removes excess exact duplicate rows |
-| Matches | Quarantines records with missing or blank `match_id`, `team_a_id` or `team_b_id`, unknown or rejected team references, and matches where both team IDs are identical; removes excess exact duplicate rows |
-| Player Statistics | Quarantines records with missing or blank `stat_id`, `match_id` or `player_id`; quarantines all records in duplicate `(match_id, player_id)` groups; quarantines records with unknown or rejected player or match references; removes excess exact duplicate rows |
-| Match Events | Quarantines records with missing or blank `event_id`, `match_id` or `event_type`, and records with unknown or rejected match references; removes excess exact duplicate rows |
-
-Additional cleaning behaviour:
-
-- **Exact duplicate removal:** Retains one copy of a record identical across all columns and quarantines excess identical copies.
-- **Duplicate player-match combinations:** Quarantines every record in a duplicated `(match_id, player_id)` group rather than arbitrarily selecting one.
-- **Reference validation:** Checks child records against the relevant parent dataset.
-- **Rejected parent references:** Distinguishes references to records rejected during upstream cleaning from references to IDs not found in the source dataset.
-- **Quarantine reasons:** Adds a `quarantine_reason` to quarantined records to support investigation.
-- **Dependency-aware cleaning:** Processes datasets in the order Teams → Players → Matches → Player Statistics → Match Events.
-
-**Scope limitation:** The supplied cleaning functions do not explicitly quarantine every issue detected by validation. In particular, invalid timestamps, failed numeric conversions and negative scores, statistics or durations are detected by validation but do not have corresponding explicit quarantine rules in the cleaning functions described here. Duplicate-key validation also does not automatically mean that all records sharing a duplicated ID are quarantined.
-
-### 6.6 Quarantine Summary
+### 6.5 Quarantine Summary
 
 The recorded pipeline run quarantined **140 records** across four datasets:
 
@@ -208,32 +185,93 @@ The recorded pipeline run quarantined **140 records** across four datasets:
 
 Quarantined records are preserved with a `quarantine_reason`. Quality-issue outputs record validation findings, while quarantine outputs preserve records rejected by implemented cleaning rules.
 
-The reconciliation confirms that raw records are accounted for in the reported clean and quarantine totals. It does not independently prove that every record was classified correctly.
+The reconciliation confirms that raw records are accounted for in the reported clean and quarantine totals.
+
 
 ## 7. Analytics and Window Functions
 
-The reusable calculations in `src/analytics.py` include the following.
+The project uses PySpark DataFrame operations, aggregations, joins, and window functions to analyse team performance, player statistics, match events, and team form.
 
-- **Team performance:** Represents both participating teams consistently, then calculates matches played, wins, losses, draws and win rate for eligible completed matches with usable scores.
-- **Player performance:** Joins player statistics with player and match data, then calculates kills, deaths, assists, damage and per-round metrics. Rankings support comparisons within games; comparisons across games or roles may not be directly equivalent.
-- **Event analysis:** Summarises events by game type, month, duration and team exposure. These patterns do not establish causation.
-- **Team form:** Orders match results chronologically and calculates recent performance over a rolling window of the latest three matches.
+### 7.1 Team Performance
 
-Window calculations support player rankings and rolling team form without collapsing all records into a single aggregate.
+- Converts each eligible completed match into two records: one from Team A's perspective and one from Team B's perspective.
+- Excludes matches without successfully parsed scores.
+- Classifies each team's result as a win, loss, or draw by comparing its score with the opponent's score.
+- Groups records by team to calculate matches played, wins, losses, draws, and win rate.
+- Calculates win rate as the percentage of matches won out of eligible matches played.
 
-Window partitioning, ordering and tie-handling influence the results and should be reviewed in the implementation.
+### 7.2 Player Performance and Rankings
+
+- Joins player statistics with match information and retains statistics from completed matches.
+- Groups records by `player_id` and `game` to calculate total kills, deaths, assists, and damage.
+- Validates each metric independently by excluding null or negative values from its calculations.
+- Calculates kills, assists, damage, and deaths per round using the corresponding valid statistics and positive round counts.
+- Enriches the aggregated results with player names, team IDs, and roles using a left join.
+- Uses `dense_rank()` to rank players separately within each game by kills, assists, damage, and deaths per round. Higher rates receive better ranks for kills, assists, and damage; lower death rates receive better ranks.
+- Leaves rates and rankings null when a valid rate cannot be calculated.
+
+### 7.3 Event Summaries
+
+The project produces four event analytics outputs:
+
+- **Events by game type:** Joins events with match information and counts events by game and event type.
+- **Events by month:** Uses parsed event timestamps to derive a `yyyy-MM` value, then counts events by month, game, and event type. Events with invalid or missing parsed timestamps are excluded from this monthly analysis.
+- **Event durations:** Includes successfully converted, non-negative durations and calculates the number of valid-duration events, average duration, and maximum duration for each game and event type.
+- **Event exposure by team:** Associates each match event with both participating teams, then counts distinct event IDs by team and event type. This measures match-event exposure; it does not prove that a team caused an event.
+
+### 7.4 Team Form Over Time
+
+- Starts with the team-perspective match records generated by the team-performance preparation function.
+- Excludes records without a parsed match timestamp because they cannot be ordered chronologically.
+- Assigns a win indicator of 1 for a win and 0 for a draw or loss.
+- Orders each team's matches by timestamp, using `match_id` to break timestamp ties.
+- Uses a rolling window containing the current match and up to the previous two matches.
+- Calculates the number of matches in the window, wins in the window, rolling win rate, and chronological match number for each team.
 
 ## 8. Spark SQL Analytics
 
-`src/sql_analytics.py` registers temporary views and produces three SQL outputs:
+The project uses Spark SQL to analyse match outcomes, event intensity, and player performance by role. The cleaned DataFrames are registered as temporary views so they can be queried using SQL.
 
-1. `match_outcomes_by_game`
-2. `event_intensity_by_game`
-3. `role_performance_by_game`
+### 8.1 Match Outcomes by Game
 
-The queries use joins, grouping, conditional aggregation and common table expressions.
+**Output:** `match_outcomes_by_game`
 
-The SQL match-outcomes result is compared with the corresponding DataFrame result using `exceptAll` and an assertion. The recorded run reported that the SQL and DataFrame match-outcome results agreed.
+- Groups matches by game.
+- Calculates total, completed, cancelled, and forfeited match counts.
+- Calculates the completion, cancellation, and forfeit percentages using total matches as the denominator.
+- Orders games by cancellation rate in descending order.
+
+### 8.2 Event Intensity by Game
+
+**Output:** `event_intensity_by_game`
+
+- Uses a common table expression (CTE) to count event records for each match.
+- Left joins those counts to the match dataset so matches without recorded events remain included.
+- Uses `COALESCE()` to assign an event count of zero when no matching event-count record exists.
+- Groups matches by game to calculate total matches, total events, average events per match, matches without events, and the percentage of matches without events.
+- Orders games by average events per match in descending order.
+
+### 8.3 Role Performance by Game
+
+**Output:** `role_performance_by_game`
+
+- Uses a CTE to join player statistics with matches and player details.
+- Includes statistics from completed matches and excludes records with missing player roles.
+- Groups records by game and player role.
+- Calculates player-match row counts, distinct player counts, and the number of valid kill records.
+- Calculates average kills, assists, deaths, and damage per round using non-negative metric values and positive round counts.
+- Calculates an adjusted kills-per-death metric using `kills / (deaths + 1)` for valid non-negative kill and death values.
+- Orders results by game and average damage per round in descending order.
+
+### 8.4 SQL and DataFrame Consistency Check
+
+The project compares the SQL match-outcomes result with an independently calculated PySpark DataFrame result.
+
+- Recalculates total, completed, cancelled, and forfeited match counts by game using DataFrame aggregations.
+- Selects the same comparison columns from both results.
+- Uses `exceptAll()` in both directions to identify missing or differing rows while preserving duplicate-row counts.
+- Reports a pass when neither result contains unmatched rows.
+- Raises an `AssertionError` if the comparison fails.
 
 ## 9. Spark Execution Plan Analysis
 
