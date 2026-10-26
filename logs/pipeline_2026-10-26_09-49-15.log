@@ -1,0 +1,720 @@
+2026-10-26 09:49:15,996 | INFO | __main__ | Logging initialized
+2026-10-26 09:49:15,996 | INFO | __main__ | Log file: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\logs\pipeline_2026-10-26_09-49-15.log
+2026-10-26 09:49:15,996 | INFO | __main__ | ======================================================================
+2026-10-26 09:49:15,996 | INFO | __main__ | STARTING E-SPORT ANALYSIS PIPELINE
+2026-10-26 09:49:15,996 | INFO | __main__ | ======================================================================
+2026-10-26 09:49:21,472 | INFO | __main__ | Spark session created successfully
+2026-10-26 09:49:21,498 | INFO | __main__ | STEP 1: INGESTION
+2026-10-26 09:49:24,023 | INFO | __main__ | Raw dataset: teams | Rows: 8
+2026-10-26 09:49:24,036 | INFO | __main__ | Raw dataset 'teams' schema:
+root
+ |-- team_id: string (nullable = true)
+ |-- team_name: string (nullable = true)
+ |-- region: string (nullable = true)
+ |-- coach: string (nullable = true)
+
+2026-10-26 09:49:24,185 | INFO | __main__ | Raw dataset: players | Rows: 80
+2026-10-26 09:49:24,186 | INFO | __main__ | Raw dataset 'players' schema:
+root
+ |-- player_id: string (nullable = true)
+ |-- player_name: string (nullable = true)
+ |-- team_id: string (nullable = true)
+ |-- role: string (nullable = true)
+ |-- join_date: string (nullable = true)
+ |-- status: string (nullable = true)
+
+2026-10-26 09:49:24,318 | INFO | __main__ | Raw dataset: matches | Rows: 402
+2026-10-26 09:49:24,320 | INFO | __main__ | Raw dataset 'matches' schema:
+root
+ |-- match_id: string (nullable = true)
+ |-- match_time: string (nullable = true)
+ |-- game: string (nullable = true)
+ |-- team_a_id: string (nullable = true)
+ |-- team_b_id: string (nullable = true)
+ |-- team_a_score: string (nullable = true)
+ |-- team_b_score: string (nullable = true)
+ |-- match_status: string (nullable = true)
+
+2026-10-26 09:49:24,441 | INFO | __main__ | Raw dataset: player_match_stats | Rows: 1803
+2026-10-26 09:49:24,452 | INFO | __main__ | Raw dataset 'player_match_stats' schema:
+root
+ |-- stat_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- player_id: string (nullable = true)
+ |-- kills: string (nullable = true)
+ |-- deaths: string (nullable = true)
+ |-- assists: string (nullable = true)
+ |-- damage: string (nullable = true)
+ |-- rounds_played: string (nullable = true)
+
+2026-10-26 09:49:24,570 | INFO | __main__ | Raw dataset: match_events | Rows: 1000
+2026-10-26 09:49:24,570 | INFO | __main__ | Raw dataset 'match_events' schema:
+root
+ |-- event_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- event_time: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- duration_seconds: string (nullable = true)
+
+2026-10-26 09:49:24,570 | INFO | __main__ | STEP 2: TRANSFORMATION
+2026-10-26 09:49:25,626 | INFO | __main__ | Transformed dataset: teams | Rows: 8
+2026-10-26 09:49:25,626 | INFO | __main__ | Transformed dataset 'teams' schema:
+root
+ |-- team_id: string (nullable = true)
+ |-- team_name: string (nullable = true)
+ |-- region: string (nullable = true)
+ |-- coach: string (nullable = true)
+
+2026-10-26 09:49:25,748 | INFO | __main__ | Transformed dataset: players | Rows: 80
+2026-10-26 09:49:25,749 | INFO | __main__ | Transformed dataset 'players' schema:
+root
+ |-- player_id: string (nullable = true)
+ |-- player_name: string (nullable = true)
+ |-- team_id: string (nullable = true)
+ |-- role: string (nullable = true)
+ |-- join_date: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- parsed_join_date: date (nullable = true)
+
+2026-10-26 09:49:25,842 | INFO | __main__ | Transformed dataset: matches | Rows: 402
+2026-10-26 09:49:25,843 | INFO | __main__ | Transformed dataset 'matches' schema:
+root
+ |-- match_id: string (nullable = true)
+ |-- match_time: string (nullable = true)
+ |-- game: string (nullable = true)
+ |-- team_a_id: string (nullable = true)
+ |-- team_b_id: string (nullable = true)
+ |-- team_a_score: string (nullable = true)
+ |-- team_b_score: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- parsed_match_time: timestamp (nullable = true)
+ |-- team_a_score_int: integer (nullable = true)
+ |-- team_b_score_int: integer (nullable = true)
+
+2026-10-26 09:49:25,943 | INFO | __main__ | Transformed dataset: player_match_stats | Rows: 1803
+2026-10-26 09:49:25,943 | INFO | __main__ | Transformed dataset 'player_match_stats' schema:
+root
+ |-- stat_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- player_id: string (nullable = true)
+ |-- kills: string (nullable = true)
+ |-- deaths: string (nullable = true)
+ |-- assists: string (nullable = true)
+ |-- damage: string (nullable = true)
+ |-- rounds_played: string (nullable = true)
+ |-- kills_int: integer (nullable = true)
+ |-- deaths_int: integer (nullable = true)
+ |-- assists_int: integer (nullable = true)
+ |-- damage_int: integer (nullable = true)
+ |-- rounds_played_int: integer (nullable = true)
+
+2026-10-26 09:49:26,044 | INFO | __main__ | Transformed dataset: match_events | Rows: 1000
+2026-10-26 09:49:26,044 | INFO | __main__ | Transformed dataset 'match_events' schema:
+root
+ |-- event_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- event_time: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- duration_seconds: string (nullable = true)
+ |-- parsed_event_time: timestamp (nullable = true)
+ |-- duration_seconds_int: integer (nullable = true)
+
+2026-10-26 09:49:26,044 | INFO | __main__ | STEP 3: DATA QUALITY VALIDATION
+2026-10-26 09:49:35,269 | INFO | __main__ | Validation summary output:
+
+=================================================================
+VALIDATION ISSUE SUMMARY
+=================================================================
+duplicate_team_ids: 0 rows flagged
+missing_team_identity: 0 rows flagged
+duplicate_player_ids: 0 rows flagged
+missing_player_identity: 0 rows flagged
+missing_player_role: 1 rows flagged
+invalid_player_join_date: 0 rows flagged
+duplicate_match_ids: 4 rows flagged
+missing_match_identity: 0 rows flagged
+invalid_match_timestamps: 1 rows flagged
+invalid_team_a_scores: 10 rows flagged
+invalid_team_b_scores: 7 rows flagged
+same_team_on_both_sides: 1 rows flagged
+negative_scores: 0 rows flagged
+duplicate_stat_ids: 6 rows flagged
+duplicate_player_match_combinations: 111 rows flagged
+missing_stat_identity: 0 rows flagged
+unparseable_kills: 29 rows flagged
+unparseable_deaths: 38 rows flagged
+unparseable_assists: 51 rows flagged
+unparseable_damage: 25 rows flagged
+unparseable_rounds_played: 304 rows flagged
+negative_kills: 1 rows flagged
+negative_deaths_int: 0 rows flagged
+negative_assists_int: 0 rows flagged
+negative_damage_int: 0 rows flagged
+negative_rounds_played_int: 0 rows flagged
+duplicate_event_ids: 0 rows flagged
+missing_event_identity: 0 rows flagged
+invalid_event_timestamps: 1 rows flagged
+unparseable_event_durations: 24 rows flagged
+negative_event_durations: 0 rows flagged
+players_with_unknown_team: 1 rows flagged
+matches_with_unknown_team_a: 0 rows flagged
+matches_with_unknown_team_b: 0 rows flagged
+stats_with_unknown_player: 1 rows flagged
+stats_for_players_with_invalid_team: 23 rows flagged
+stats_with_unknown_match: 0 rows flagged
+events_with_unknown_match: 1 rows flagged
+2026-10-26 09:49:35,269 | INFO | __main__ | ============================================================
+2026-10-26 09:49:35,269 | INFO | __main__ | DATA QUALITY ISSUE SUMMARY
+2026-10-26 09:49:35,269 | INFO | __main__ | ============================================================
+2026-10-26 09:49:35,444 | INFO | __main__ | Quality check 'duplicate_team_ids': no flagged rows
+2026-10-26 09:49:35,502 | INFO | __main__ | Quality check 'missing_team_identity': no flagged rows
+2026-10-26 09:49:35,688 | INFO | __main__ | Quality check 'duplicate_player_ids': no flagged rows
+2026-10-26 09:49:35,761 | INFO | __main__ | Quality check 'missing_player_identity': no flagged rows
+2026-10-26 09:49:35,819 | WARNING | __main__ | Quality check 'missing_player_role': 1 flagged rows
+2026-10-26 09:49:35,879 | INFO | __main__ | Quality check 'invalid_player_join_date': no flagged rows
+2026-10-26 09:49:36,358 | WARNING | __main__ | Quality check 'duplicate_match_ids': 4 flagged rows
+2026-10-26 09:49:36,427 | INFO | __main__ | Quality check 'missing_match_identity': no flagged rows
+2026-10-26 09:49:36,499 | WARNING | __main__ | Quality check 'invalid_match_timestamps': 1 flagged rows
+2026-10-26 09:49:36,558 | WARNING | __main__ | Quality check 'invalid_team_a_scores': 10 flagged rows
+2026-10-26 09:49:36,619 | WARNING | __main__ | Quality check 'invalid_team_b_scores': 7 flagged rows
+2026-10-26 09:49:36,682 | WARNING | __main__ | Quality check 'same_team_on_both_sides': 1 flagged rows
+2026-10-26 09:49:36,740 | INFO | __main__ | Quality check 'negative_scores': no flagged rows
+2026-10-26 09:49:37,367 | WARNING | __main__ | Quality check 'duplicate_stat_ids': 6 flagged rows
+2026-10-26 09:49:37,952 | WARNING | __main__ | Quality check 'duplicate_player_match_combinations': 111 flagged rows
+2026-10-26 09:49:38,024 | INFO | __main__ | Quality check 'missing_stat_identity': no flagged rows
+2026-10-26 09:49:38,069 | WARNING | __main__ | Quality check 'unparseable_kills': 29 flagged rows
+2026-10-26 09:49:38,140 | WARNING | __main__ | Quality check 'unparseable_deaths': 38 flagged rows
+2026-10-26 09:49:38,208 | WARNING | __main__ | Quality check 'unparseable_assists': 51 flagged rows
+2026-10-26 09:49:38,267 | WARNING | __main__ | Quality check 'unparseable_damage': 25 flagged rows
+2026-10-26 09:49:38,329 | WARNING | __main__ | Quality check 'unparseable_rounds_played': 304 flagged rows
+2026-10-26 09:49:38,370 | WARNING | __main__ | Quality check 'negative_kills': 1 flagged rows
+2026-10-26 09:49:38,437 | INFO | __main__ | Quality check 'negative_deaths_int': no flagged rows
+2026-10-26 09:49:38,488 | INFO | __main__ | Quality check 'negative_assists_int': no flagged rows
+2026-10-26 09:49:38,562 | INFO | __main__ | Quality check 'negative_damage_int': no flagged rows
+2026-10-26 09:49:38,622 | INFO | __main__ | Quality check 'negative_rounds_played_int': no flagged rows
+2026-10-26 09:49:38,880 | INFO | __main__ | Quality check 'duplicate_event_ids': no flagged rows
+2026-10-26 09:49:38,942 | INFO | __main__ | Quality check 'missing_event_identity': no flagged rows
+2026-10-26 09:49:39,005 | WARNING | __main__ | Quality check 'invalid_event_timestamps': 1 flagged rows
+2026-10-26 09:49:39,058 | WARNING | __main__ | Quality check 'unparseable_event_durations': 24 flagged rows
+2026-10-26 09:49:39,114 | INFO | __main__ | Quality check 'negative_event_durations': no flagged rows
+2026-10-26 09:49:39,247 | WARNING | __main__ | Quality check 'players_with_unknown_team': 1 flagged rows
+2026-10-26 09:49:39,359 | INFO | __main__ | Quality check 'matches_with_unknown_team_a': no flagged rows
+2026-10-26 09:49:39,484 | INFO | __main__ | Quality check 'matches_with_unknown_team_b': no flagged rows
+2026-10-26 09:49:39,652 | WARNING | __main__ | Quality check 'stats_with_unknown_player': 1 flagged rows
+2026-10-26 09:49:39,838 | WARNING | __main__ | Quality check 'stats_for_players_with_invalid_team': 23 flagged rows
+2026-10-26 09:49:40,070 | INFO | __main__ | Quality check 'stats_with_unknown_match': no flagged rows
+2026-10-26 09:49:40,477 | WARNING | __main__ | Quality check 'events_with_unknown_match': 1 flagged rows
+2026-10-26 09:49:40,477 | INFO | __main__ | Sum of flagged rows across quality checks: 640
+2026-10-26 09:49:40,477 | INFO | __main__ | Note: this is a sum across checks; a record may be flagged by more than one check.
+2026-10-26 09:49:40,477 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_team_ids
+2026-10-26 09:49:41,998 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_team_ids
+2026-10-26 09:49:41,998 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_team_identity
+2026-10-26 09:49:42,568 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_team_identity
+2026-10-26 09:49:42,568 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_ids
+2026-10-26 09:49:43,120 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_ids
+2026-10-26 09:49:43,120 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_identity
+2026-10-26 09:49:43,495 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_identity
+2026-10-26 09:49:43,495 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_role
+2026-10-26 09:49:43,931 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_role
+2026-10-26 09:49:43,933 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_player_join_date
+2026-10-26 09:49:44,947 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_player_join_date
+2026-10-26 09:49:44,947 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_match_ids
+2026-10-26 09:49:45,632 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_match_ids
+2026-10-26 09:49:45,632 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_match_identity
+2026-10-26 09:49:46,001 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_match_identity
+2026-10-26 09:49:46,001 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_match_timestamps
+2026-10-26 09:49:46,342 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_match_timestamps
+2026-10-26 09:49:46,342 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_a_scores
+2026-10-26 09:49:46,682 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_a_scores
+2026-10-26 09:49:46,682 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_b_scores
+2026-10-26 09:49:47,780 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_b_scores
+2026-10-26 09:49:47,780 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\same_team_on_both_sides
+2026-10-26 09:49:48,151 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\same_team_on_both_sides
+2026-10-26 09:49:48,151 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_scores
+2026-10-26 09:49:48,509 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_scores
+2026-10-26 09:49:48,509 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_stat_ids
+2026-10-26 09:49:49,108 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_stat_ids
+2026-10-26 09:49:49,108 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_match_combinations
+2026-10-26 09:49:50,021 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_match_combinations
+2026-10-26 09:49:50,021 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_stat_identity
+2026-10-26 09:49:50,374 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_stat_identity
+2026-10-26 09:49:50,374 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_kills
+2026-10-26 09:49:50,706 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_kills
+2026-10-26 09:49:50,706 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_deaths
+2026-10-26 09:49:51,160 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_deaths
+2026-10-26 09:49:51,160 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_assists
+2026-10-26 09:49:51,499 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_assists
+2026-10-26 09:49:51,499 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_damage
+2026-10-26 09:49:51,823 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_damage
+2026-10-26 09:49:51,823 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_rounds_played
+2026-10-26 09:49:52,181 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_rounds_played
+2026-10-26 09:49:52,181 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_kills
+2026-10-26 09:49:52,990 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_kills
+2026-10-26 09:49:52,991 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_deaths_int
+2026-10-26 09:49:53,500 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_deaths_int
+2026-10-26 09:49:53,500 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_assists_int
+2026-10-26 09:49:53,813 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_assists_int
+2026-10-26 09:49:53,813 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_damage_int
+2026-10-26 09:49:54,134 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_damage_int
+2026-10-26 09:49:54,134 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_rounds_played_int
+2026-10-26 09:49:54,442 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_rounds_played_int
+2026-10-26 09:49:54,442 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_event_ids
+2026-10-26 09:49:54,931 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_event_ids
+2026-10-26 09:49:54,931 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_event_identity
+2026-10-26 09:49:55,421 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_event_identity
+2026-10-26 09:49:55,421 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_event_timestamps
+2026-10-26 09:49:55,740 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_event_timestamps
+2026-10-26 09:49:55,740 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_event_durations
+2026-10-26 09:49:56,045 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_event_durations
+2026-10-26 09:49:56,045 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_event_durations
+2026-10-26 09:49:56,372 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_event_durations
+2026-10-26 09:49:56,372 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\players_with_unknown_team
+2026-10-26 09:49:56,810 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\players_with_unknown_team
+2026-10-26 09:49:56,810 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_a
+2026-10-26 09:49:57,203 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_a
+2026-10-26 09:49:57,203 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_b
+2026-10-26 09:49:57,684 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_b
+2026-10-26 09:49:57,685 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_player
+2026-10-26 09:49:58,350 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_player
+2026-10-26 09:49:58,350 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_for_players_with_invalid_team
+2026-10-26 09:49:58,877 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_for_players_with_invalid_team
+2026-10-26 09:49:58,877 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_match
+2026-10-26 09:49:59,561 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_match
+2026-10-26 09:49:59,561 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\events_with_unknown_match
+2026-10-26 09:50:00,070 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\events_with_unknown_match
+2026-10-26 09:50:00,070 | INFO | __main__ | Data quality validation completed
+2026-10-26 09:50:00,070 | INFO | __main__ | STEP 4: CLEANING AND QUARANTINE
+2026-10-26 09:50:01,173 | INFO | __main__ | Cleaned dataset: teams | Rows: 8
+2026-10-26 09:50:01,173 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\teams
+2026-10-26 09:50:01,556 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\teams
+2026-10-26 09:50:01,815 | INFO | __main__ | Cleaned dataset: players | Rows: 79
+2026-10-26 09:50:01,815 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\players
+2026-10-26 09:50:02,521 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\players
+2026-10-26 09:50:02,903 | INFO | __main__ | Cleaned dataset: matches | Rows: 399
+2026-10-26 09:50:02,903 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\matches
+2026-10-26 09:50:03,716 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\matches
+2026-10-26 09:50:05,213 | INFO | __main__ | Cleaned dataset: player_match_stats | Rows: 1670
+2026-10-26 09:50:05,214 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\player_match_stats
+2026-10-26 09:50:07,054 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\player_match_stats
+2026-10-26 09:50:07,941 | INFO | __main__ | Cleaned dataset: match_events | Rows: 997
+2026-10-26 09:50:07,941 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\match_events
+2026-10-26 09:50:09,026 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\match_events
+2026-10-26 09:50:09,407 | INFO | __main__ | Quarantined dataset: teams | Rows: 0
+2026-10-26 09:50:09,408 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\teams
+2026-10-26 09:50:09,878 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\teams
+2026-10-26 09:50:10,685 | WARNING | __main__ | Quarantined dataset: players | Rows: 1
+2026-10-26 09:50:10,700 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\players
+2026-10-26 09:50:12,113 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\players
+2026-10-26 09:50:13,445 | WARNING | __main__ | Quarantined dataset: matches | Rows: 3
+2026-10-26 09:50:13,445 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\matches
+2026-10-26 09:50:14,809 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\matches
+2026-10-26 09:50:17,031 | WARNING | __main__ | Quarantined dataset: player_match_stats | Rows: 133
+2026-10-26 09:50:17,031 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\player_match_stats
+2026-10-26 09:50:19,708 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\player_match_stats
+2026-10-26 09:50:20,652 | WARNING | __main__ | Quarantined dataset: match_events | Rows: 3
+2026-10-26 09:50:20,652 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\match_events
+2026-10-26 09:50:22,585 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\match_events
+2026-10-26 09:50:22,586 | INFO | __main__ | Cleaning and quarantine completed
+2026-10-26 09:50:22,586 | INFO | __main__ | STEP 5: DATAFRAME ANALYTICS
+2026-10-26 09:50:23,717 | INFO | __main__ | DATAFRAME ANALYTICS RESULT: team_performance
+2026-10-26 09:50:23,728 | INFO | __main__ | Analytics result 'team_performance' schema:
+root
+ |-- team_id: string (nullable = true)
+ |-- matches_played: long (nullable = false)
+ |-- wins: long (nullable = true)
+ |-- losses: long (nullable = true)
+ |-- draws: long (nullable = true)
+ |-- win_rate_pct: double (nullable = true)
+
+2026-10-26 09:50:24,450 | INFO | __main__ | Analytics result 'team_performance' | Displaying up to 20 rows:
++-------+--------------+----+------+-----+------------+
+|team_id|matches_played|wins|losses|draws|win_rate_pct|
++-------+--------------+----+------+-----+------------+
+|TM04   |58            |17  |28    |13   |29.31       |
+|TM02   |59            |26  |23    |10   |44.07       |
+|TM05   |66            |24  |29    |13   |36.36       |
+|TM07   |54            |24  |19    |11   |44.44       |
+|TM03   |76            |36  |26    |14   |47.37       |
+|TM06   |55            |19  |21    |15   |34.55       |
+|TM08   |69            |27  |25    |17   |39.13       |
+|TM01   |53            |20  |22    |11   |37.74       |
++-------+--------------+----+------+-----+------------+
+2026-10-26 09:50:24,930 | INFO | __main__ | Analytics result 'team_performance' | Total rows: 8
+2026-10-26 09:50:24,930 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_performance
+2026-10-26 09:50:26,691 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_performance
+2026-10-26 09:50:26,691 | INFO | __main__ | DATAFRAME ANALYTICS RESULT: player_performance
+2026-10-26 09:50:26,693 | INFO | __main__ | Analytics result 'player_performance' schema:
+root
+ |-- player_id: string (nullable = true)
+ |-- player_name: string (nullable = true)
+ |-- team_id: string (nullable = true)
+ |-- role: string (nullable = true)
+ |-- game: string (nullable = true)
+ |-- total_kills: long (nullable = true)
+ |-- total_deaths: long (nullable = true)
+ |-- total_assists: long (nullable = true)
+ |-- total_damage: long (nullable = true)
+ |-- kills_per_round: double (nullable = true)
+ |-- assists_per_round: double (nullable = true)
+ |-- damage_per_round: double (nullable = true)
+ |-- deaths_per_round: double (nullable = true)
+ |-- kills_per_round_rank: integer (nullable = true)
+ |-- assists_per_round_rank: integer (nullable = true)
+ |-- damage_per_round_rank: integer (nullable = true)
+ |-- deaths_per_round_rank: integer (nullable = true)
+
+2026-10-26 09:50:28,905 | INFO | __main__ | Analytics result 'player_performance' | Displaying up to 20 rows:
++---------+-----------+-------+----------+-----------------+-----------+------------+-------------+------------+---------------+-----------------+----------------+----------------+--------------------+----------------------+---------------------+---------------------+
+|player_id|player_name|team_id|role      |game             |total_kills|total_deaths|total_assists|total_damage|kills_per_round|assists_per_round|damage_per_round|deaths_per_round|kills_per_round_rank|assists_per_round_rank|damage_per_round_rank|deaths_per_round_rank|
++---------+-----------+-------+----------+-----------------+-----------+------------+-------------+------------+---------------+-----------------+----------------+----------------+--------------------+----------------------+---------------------+---------------------+
+|PL021    |Nova_21    |TM01   |NULL      |league of legends|90         |54          |46           |43939       |0.737          |0.368            |371.632         |0.105           |51                  |53                    |32                   |1                    |
+|PL050    |Luna_50    |TM06   |flex      |league of legends|38         |9           |39           |13544       |2.833          |2.0              |954.333         |0.167           |1                   |2                     |1                    |2                    |
+|PL067    |Rift_67    |TM04   |support   |league of legends|41         |8           |37           |6195        |1.025          |0.925            |154.875         |0.2             |37                  |20                    |66                   |3                    |
+|PL075    |Zero_75    |TM02   |flex      |league of legends|82         |43          |22           |13624       |1.125          |0.208            |209.417         |0.292           |30                  |67                    |57                   |4                    |
+|PL057    |Mako_57    |TM02   |sentinel  |league of legends|20         |6           |8            |8587        |1.0            |0.4              |429.35          |0.3             |39                  |51                    |24                   |5                    |
+|PL038    |Rift_38    |TM06   |controller|league of legends|111        |19          |49           |25225       |1.788          |0.904            |352.942         |0.308           |8                   |24                    |38                   |6                    |
+|PL059    |Viper_59   |TM05   |sentinel  |league of legends|6          |9           |7            |1589        |0.25           |0.292            |66.208          |0.375           |66                  |59                    |73                   |7                    |
+|PL016    |Pixel_16   |TM05   |controller|league of legends|29         |21          |8            |7965        |0.75           |0.25             |205.0           |0.417           |50                  |63                    |58                   |8                    |
+|PL053    |Nova_53    |TM01   |duelist   |league of legends|95         |46          |53           |29705       |1.5            |0.775            |233.375         |0.45            |14                  |31                    |54                   |9                    |
+|PL061    |Mako_61    |TM01   |flex      |league of legends|89         |68          |38           |41871       |0.708          |0.313            |435.625         |0.458           |52                  |56                    |23                   |10                   |
+|PL074    |Kite_74    |TM02   |duelist   |league of legends|5          |6           |23           |7958        |0.385          |1.769            |612.154         |0.462           |63                  |5                     |9                    |11                   |
+|PL031    |Zero_31    |TM08   |sentinel  |league of legends|68         |80          |122          |55240       |0.667          |2.0              |483.167         |0.5             |54                  |2                     |16                   |12                   |
+|PL008    |Ace_8      |TM02   |sentinel  |league of legends|9          |31          |17           |7319        |0.3            |0.6              |20.0            |0.5             |65                  |44                    |76                   |12                   |
+|PL060    |Zero_60    |TM01   |duelist   |league of legends|79         |55          |79           |25463       |0.595          |0.757            |193.459         |0.514           |56                  |33                    |62                   |13                   |
+|PL077    |Luna_77    |TM08   |flex      |league of legends|102        |24          |29           |9564        |2.091          |0.242            |167.97          |0.545           |3                   |64                    |65                   |14                   |
+|PL033    |Nova_33    |TM02   |controller|league of legends|95         |49          |22           |29997       |1.51           |0.224            |471.082         |0.551           |13                  |66                    |18                   |15                   |
+|PL048    |Pixel_48   |TM05   |sentinel  |league of legends|82         |86          |96           |28912       |0.6            |0.913            |288.35          |0.563           |55                  |21                    |47                   |16                   |
+|PL029    |Pixel_29   |TM02   |duelist   |league of legends|22         |12          |12           |10301       |1.1            |0.6              |515.05          |0.6             |32                  |44                    |14                   |17                   |
+|PL035    |Rift_35    |TM02   |flex      |league of legends|89         |60          |44           |50299       |0.865          |0.461            |452.831         |0.607           |42                  |48                    |22                   |18                   |
+|PL054    |Rift_54    |TM01   |support   |league of legends|7          |35          |60           |16163       |0.123          |1.053            |283.561         |0.614           |67                  |16                    |49                   |19                   |
++---------+-----------+-------+----------+-----------------+-----------+------------+-------------+------------+---------------+-----------------+----------------+----------------+--------------------+----------------------+---------------------+---------------------+
+only showing top 20 rows
+2026-10-26 09:50:30,419 | INFO | __main__ | Analytics result 'player_performance' | Total rows: 304
+2026-10-26 09:50:30,419 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\player_performance
+2026-10-26 09:50:32,655 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\player_performance
+2026-10-26 09:50:32,657 | INFO | __main__ | DATAFRAME ANALYTICS RESULT: events_by_game_type
+2026-10-26 09:50:32,657 | INFO | __main__ | Analytics result 'events_by_game_type' schema:
+root
+ |-- game: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- event_count: long (nullable = false)
+
+2026-10-26 09:50:34,110 | INFO | __main__ | Analytics result 'events_by_game_type' | Displaying up to 20 rows:
++-----------------+---------------+-----------+
+|game             |event_type     |event_count|
++-----------------+---------------+-----------+
+|league of legends|highlight      |55         |
+|league of legends|technical_pause|46         |
+|league of legends|substitution   |44         |
+|league of legends|timeout        |40         |
+|league of legends|penalty        |37         |
+|league of legends|disconnect     |29         |
+|overwatch        |disconnect     |46         |
+|overwatch        |penalty        |43         |
+|overwatch        |technical_pause|42         |
+|overwatch        |timeout        |41         |
+|overwatch        |substitution   |35         |
+|overwatch        |highlight      |29         |
+|rocket league    |technical_pause|50         |
+|rocket league    |disconnect     |44         |
+|rocket league    |substitution   |43         |
+|rocket league    |highlight      |32         |
+|rocket league    |penalty        |30         |
+|rocket league    |timeout        |26         |
+|valorant         |substitution   |52         |
+|valorant         |timeout        |51         |
++-----------------+---------------+-----------+
+only showing top 20 rows
+2026-10-26 09:50:35,015 | INFO | __main__ | Analytics result 'events_by_game_type' | Total rows: 24
+2026-10-26 09:50:35,015 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_game_type
+2026-10-26 09:50:36,296 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_game_type
+2026-10-26 09:50:36,296 | INFO | __main__ | DATAFRAME ANALYTICS RESULT: events_by_month
+2026-10-26 09:50:36,296 | INFO | __main__ | Analytics result 'events_by_month' schema:
+root
+ |-- event_month: string (nullable = true)
+ |-- game: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- event_count: long (nullable = false)
+
+2026-10-26 09:50:37,744 | INFO | __main__ | Analytics result 'events_by_month' | Displaying up to 20 rows:
++-----------+-----------------+---------------+-----------+
+|event_month|game             |event_type     |event_count|
++-----------+-----------------+---------------+-----------+
+|2026-09    |league of legends|highlight      |55         |
+|2026-09    |league of legends|technical_pause|46         |
+|2026-09    |league of legends|substitution   |44         |
+|2026-09    |league of legends|timeout        |40         |
+|2026-09    |league of legends|penalty        |37         |
+|2026-09    |league of legends|disconnect     |29         |
+|2026-09    |overwatch        |disconnect     |46         |
+|2026-09    |overwatch        |penalty        |43         |
+|2026-09    |overwatch        |technical_pause|42         |
+|2026-09    |overwatch        |timeout        |41         |
+|2026-09    |overwatch        |substitution   |35         |
+|2026-09    |overwatch        |highlight      |29         |
+|2026-09    |rocket league    |technical_pause|50         |
+|2026-09    |rocket league    |substitution   |43         |
+|2026-09    |rocket league    |disconnect     |43         |
+|2026-09    |rocket league    |highlight      |32         |
+|2026-09    |rocket league    |penalty        |30         |
+|2026-09    |rocket league    |timeout        |26         |
+|2026-09    |valorant         |substitution   |52         |
+|2026-09    |valorant         |timeout        |51         |
++-----------+-----------------+---------------+-----------+
+only showing top 20 rows
+2026-10-26 09:50:38,611 | INFO | __main__ | Analytics result 'events_by_month' | Total rows: 24
+2026-10-26 09:50:38,611 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_month
+2026-10-26 09:50:39,632 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_month
+2026-10-26 09:50:39,632 | INFO | __main__ | DATAFRAME ANALYTICS RESULT: event_durations
+2026-10-26 09:50:39,632 | INFO | __main__ | Analytics result 'event_durations' schema:
+root
+ |-- game: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- events_with_valid_duration: long (nullable = false)
+ |-- avg_duration_seconds: double (nullable = true)
+ |-- max_duration_seconds: integer (nullable = true)
+
+2026-10-26 09:50:40,438 | INFO | __main__ | Analytics result 'event_durations' | Displaying up to 20 rows:
++-----------------+---------------+--------------------------+--------------------+--------------------+
+|game             |event_type     |events_with_valid_duration|avg_duration_seconds|max_duration_seconds|
++-----------------+---------------+--------------------------+--------------------+--------------------+
+|league of legends|disconnect     |28                        |509.68              |899                 |
+|league of legends|highlight      |51                        |449.27              |886                 |
+|league of legends|penalty        |35                        |429.74              |892                 |
+|league of legends|substitution   |44                        |492.86              |894                 |
+|league of legends|technical_pause|46                        |426.43              |885                 |
+|league of legends|timeout        |39                        |440.62              |896                 |
+|overwatch        |disconnect     |46                        |454.65              |873                 |
+|overwatch        |highlight      |28                        |476.93              |871                 |
+|overwatch        |penalty        |41                        |449.07              |845                 |
+|overwatch        |substitution   |35                        |429.06              |890                 |
+|overwatch        |technical_pause|42                        |396.55              |900                 |
+|overwatch        |timeout        |40                        |453.05              |851                 |
+|rocket league    |disconnect     |43                        |370.44              |881                 |
+|rocket league    |highlight      |32                        |452.66              |872                 |
+|rocket league    |penalty        |29                        |361.69              |820                 |
+|rocket league    |substitution   |42                        |420.36              |895                 |
+|rocket league    |technical_pause|48                        |553.04              |896                 |
+|rocket league    |timeout        |23                        |457.22              |895                 |
+|valorant         |disconnect     |48                        |457.98              |846                 |
+|valorant         |highlight      |47                        |366.98              |881                 |
++-----------------+---------------+--------------------------+--------------------+--------------------+
+only showing top 20 rows
+2026-10-26 09:50:41,079 | INFO | __main__ | Analytics result 'event_durations' | Total rows: 24
+2026-10-26 09:50:41,079 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_durations
+2026-10-26 09:50:42,282 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_durations
+2026-10-26 09:50:42,282 | INFO | __main__ | DATAFRAME ANALYTICS RESULT: event_exposure_by_team
+2026-10-26 09:50:42,292 | INFO | __main__ | Analytics result 'event_exposure_by_team' schema:
+root
+ |-- team_id: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- match_event_count: long (nullable = false)
+
+2026-10-26 09:50:43,534 | INFO | __main__ | Analytics result 'event_exposure_by_team' | Displaying up to 20 rows:
++-------+---------------+-----------------+
+|team_id|event_type     |match_event_count|
++-------+---------------+-----------------+
+|TM01   |technical_pause|44               |
+|TM01   |disconnect     |43               |
+|TM01   |timeout        |40               |
+|TM01   |highlight      |39               |
+|TM01   |substitution   |39               |
+|TM01   |penalty        |34               |
+|TM02   |technical_pause|54               |
+|TM02   |substitution   |52               |
+|TM02   |highlight      |48               |
+|TM02   |penalty        |42               |
+|TM02   |timeout        |38               |
+|TM02   |disconnect     |37               |
+|TM03   |technical_pause|52               |
+|TM03   |disconnect     |52               |
+|TM03   |substitution   |50               |
+|TM03   |penalty        |46               |
+|TM03   |highlight      |39               |
+|TM03   |timeout        |33               |
+|TM04   |highlight      |50               |
+|TM04   |penalty        |40               |
++-------+---------------+-----------------+
+only showing top 20 rows
+2026-10-26 09:50:45,042 | INFO | __main__ | Analytics result 'event_exposure_by_team' | Total rows: 48
+2026-10-26 09:50:45,042 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_exposure_by_team
+2026-10-26 09:50:47,249 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_exposure_by_team
+2026-10-26 09:50:47,249 | INFO | __main__ | DATAFRAME ANALYTICS RESULT: team_form_over_time
+2026-10-26 09:50:47,249 | INFO | __main__ | Analytics result 'team_form_over_time' schema:
+root
+ |-- team_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- parsed_match_time: timestamp (nullable = true)
+ |-- team_score: integer (nullable = true)
+ |-- opponent_score: integer (nullable = true)
+ |-- is_win: integer (nullable = false)
+ |-- match_number_for_team: integer (nullable = false)
+ |-- matches_in_window: long (nullable = false)
+ |-- wins_in_window: long (nullable = true)
+ |-- rolling_win_rate_pct: double (nullable = true)
+
+2026-10-26 09:50:47,757 | INFO | __main__ | Analytics result 'team_form_over_time' | Displaying up to 20 rows:
++-------+--------+-------------------+----------+--------------+------+---------------------+-----------------+--------------+--------------------+
+|team_id|match_id|parsed_match_time  |team_score|opponent_score|is_win|match_number_for_team|matches_in_window|wins_in_window|rolling_win_rate_pct|
++-------+--------+-------------------+----------+--------------+------+---------------------+-----------------+--------------+--------------------+
+|TM01   |MT0358  |2026-09-01 01:15:00|2         |3             |0     |1                    |1                |0             |0.0                 |
+|TM01   |MT0387  |2026-09-01 01:15:00|0         |1             |0     |2                    |2                |0             |0.0                 |
+|TM01   |MT0235  |2026-09-01 12:15:00|0         |3             |0     |3                    |3                |0             |0.0                 |
+|TM01   |MT0296  |2026-09-01 18:00:00|3         |2             |1     |4                    |3                |1             |33.33               |
+|TM01   |MT0193  |2026-09-01 19:00:00|0         |1             |0     |5                    |3                |1             |33.33               |
+|TM01   |MT0194  |2026-09-01 21:00:00|1         |2             |0     |6                    |3                |1             |33.33               |
+|TM01   |MT0277  |2026-09-02 02:15:00|1         |3             |0     |7                    |3                |0             |0.0                 |
+|TM01   |MT0182  |2026-09-04 05:45:00|1         |3             |0     |8                    |3                |0             |0.0                 |
+|TM01   |MT0095  |2026-09-04 15:15:00|1         |0             |1     |9                    |3                |1             |33.33               |
+|TM01   |MT0157  |2026-09-04 21:00:00|0         |2             |0     |10                   |3                |1             |33.33               |
+|TM01   |MT0389  |2026-09-05 02:45:00|1         |1             |0     |11                   |3                |1             |33.33               |
+|TM01   |MT0108  |2026-09-05 12:15:00|1         |0             |1     |12                   |3                |1             |33.33               |
+|TM01   |MT0243  |2026-09-05 20:45:00|1         |0             |1     |13                   |3                |2             |66.67               |
+|TM01   |MT0360  |2026-09-07 03:15:00|1         |0             |1     |14                   |3                |3             |100.0               |
+|TM01   |MT0383  |2026-09-07 08:00:00|2         |3             |0     |15                   |3                |2             |66.67               |
+|TM01   |MT0008  |2026-09-07 14:00:00|2         |0             |1     |16                   |3                |2             |66.67               |
+|TM01   |MT0342  |2026-09-07 15:30:00|2         |0             |1     |17                   |3                |2             |66.67               |
+|TM01   |MT0150  |2026-09-07 23:30:00|2         |2             |0     |18                   |3                |2             |66.67               |
+|TM01   |MT0198  |2026-09-08 00:30:00|2         |2             |0     |19                   |3                |1             |33.33               |
+|TM01   |MT0362  |2026-09-08 02:00:00|1         |0             |1     |20                   |3                |1             |33.33               |
++-------+--------+-------------------+----------+--------------+------+---------------------+-----------------+--------------+--------------------+
+only showing top 20 rows
+2026-10-26 09:50:48,129 | INFO | __main__ | Analytics result 'team_form_over_time' | Total rows: 488
+2026-10-26 09:50:48,129 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_form_over_time
+2026-10-26 09:50:48,857 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_form_over_time
+2026-10-26 09:50:48,858 | INFO | __main__ | DataFrame analytics completed
+2026-10-26 09:50:48,858 | INFO | __main__ | STEP 6: SPARK SQL ANALYTICS
+2026-10-26 09:50:53,481 | INFO | __main__ | SPARK SQL ANALYTICS RESULT: match_outcomes_by_game
+2026-10-26 09:50:53,481 | INFO | __main__ | SQL analytics result 'match_outcomes_by_game' schema:
+root
+ |-- game: string (nullable = true)
+ |-- total_matches: long (nullable = false)
+ |-- completed_matches: long (nullable = true)
+ |-- cancelled_matches: long (nullable = true)
+ |-- forfeited_matches: long (nullable = true)
+ |-- completion_rate_pct: decimal(27,2) (nullable = true)
+ |-- cancellation_rate_pct: decimal(27,2) (nullable = true)
+ |-- forfeit_rate_pct: decimal(27,2) (nullable = true)
+
+2026-10-26 09:50:54,061 | INFO | __main__ | SQL analytics result 'match_outcomes_by_game' | Displaying up to 20 rows:
++-----------------+-------------+-----------------+-----------------+-----------------+-------------------+---------------------+----------------+
+|game             |total_matches|completed_matches|cancelled_matches|forfeited_matches|completion_rate_pct|cancellation_rate_pct|forfeit_rate_pct|
++-----------------+-------------+-----------------+-----------------+-----------------+-------------------+---------------------+----------------+
+|valorant         |110          |70               |27               |13               |63.64              |24.55                |11.82           |
+|overwatch        |92           |55               |19               |18               |59.78              |20.65                |19.57           |
+|league of legends|104          |65               |20               |19               |62.50              |19.23                |18.27           |
+|rocket league    |93           |63               |15               |15               |67.74              |16.13                |16.13           |
++-----------------+-------------+-----------------+-----------------+-----------------+-------------------+---------------------+----------------+
+2026-10-26 09:50:54,374 | INFO | __main__ | SQL analytics result 'match_outcomes_by_game' | Total rows: 4
+2026-10-26 09:50:54,374 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\match_outcomes_by_game
+2026-10-26 09:50:55,198 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\match_outcomes_by_game
+2026-10-26 09:50:55,198 | INFO | __main__ | SPARK SQL ANALYTICS RESULT: event_intensity_by_game
+2026-10-26 09:50:55,198 | INFO | __main__ | SQL analytics result 'event_intensity_by_game' schema:
+root
+ |-- game: string (nullable = true)
+ |-- total_matches: long (nullable = false)
+ |-- total_events: long (nullable = true)
+ |-- avg_events_per_match: double (nullable = true)
+ |-- matches_without_events: long (nullable = true)
+ |-- pct_matches_without_events: decimal(27,2) (nullable = true)
+
+2026-10-26 09:50:56,110 | INFO | __main__ | SQL analytics result 'event_intensity_by_game' | Displaying up to 20 rows:
++-----------------+-------------+------------+--------------------+----------------------+--------------------------+
+|game             |total_matches|total_events|avg_events_per_match|matches_without_events|pct_matches_without_events|
++-----------------+-------------+------------+--------------------+----------------------+--------------------------+
+|valorant         |110          |285         |2.59                |10                    |9.09                      |
+|overwatch        |92           |236         |2.57                |9                     |9.78                      |
+|rocket league    |93           |225         |2.42                |9                     |9.68                      |
+|league of legends|104          |251         |2.41                |12                    |11.54                     |
++-----------------+-------------+------------+--------------------+----------------------+--------------------------+
+2026-10-26 09:50:58,068 | INFO | __main__ | SQL analytics result 'event_intensity_by_game' | Total rows: 4
+2026-10-26 09:50:58,068 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\event_intensity_by_game
+2026-10-26 09:50:59,415 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\event_intensity_by_game
+2026-10-26 09:50:59,415 | INFO | __main__ | SPARK SQL ANALYTICS RESULT: role_performance_by_game
+2026-10-26 09:50:59,416 | INFO | __main__ | SQL analytics result 'role_performance_by_game' schema:
+root
+ |-- game: string (nullable = true)
+ |-- role: string (nullable = true)
+ |-- player_match_rows: long (nullable = false)
+ |-- unique_players: long (nullable = false)
+ |-- valid_kill_records: long (nullable = false)
+ |-- avg_kills_per_round: decimal(16,3) (nullable = true)
+ |-- avg_assists_per_round: decimal(16,3) (nullable = true)
+ |-- avg_deaths_per_round: decimal(16,3) (nullable = true)
+ |-- avg_damage_per_round: decimal(15,2) (nullable = true)
+ |-- avg_kills_per_death_adjusted: decimal(16,3) (nullable = true)
+
+2026-10-26 09:51:01,865 | INFO | __main__ | SQL analytics result 'role_performance_by_game' | Displaying up to 20 rows:
++-----------------+----------+-----------------+--------------+------------------+-------------------+---------------------+--------------------+--------------------+----------------------------+
+|game             |role      |player_match_rows|unique_players|valid_kill_records|avg_kills_per_round|avg_assists_per_round|avg_deaths_per_round|avg_damage_per_round|avg_kills_per_death_adjusted|
++-----------------+----------+-----------------+--------------+------------------+-------------------+---------------------+--------------------+--------------------+----------------------------+
+|league of legends|controller|51               |14            |50                |1.448              |0.755                |1.054               |439.79              |2.027                       |
+|league of legends|duelist   |51               |17            |51                |1.023              |0.872                |1.089               |409.84              |1.890                       |
+|league of legends|support   |42               |13            |40                |1.071              |0.838                |1.030               |352.68              |1.849                       |
+|league of legends|flex      |69               |20            |67                |1.163              |0.627                |0.914               |342.36              |2.810                       |
+|league of legends|sentinel  |43               |13            |43                |0.886              |0.831                |0.824               |292.97              |1.421                       |
+|overwatch        |support   |44               |13            |44                |1.269              |0.959                |1.171               |440.59              |2.575                       |
+|overwatch        |flex      |62               |19            |61                |1.090              |0.736                |0.890               |405.74              |2.748                       |
+|overwatch        |duelist   |52               |16            |51                |1.003              |0.747                |1.024               |375.75              |2.676                       |
+|overwatch        |sentinel  |35               |11            |35                |0.936              |0.692                |1.008               |327.67              |1.388                       |
+|overwatch        |controller|31               |12            |29                |0.913              |0.577                |0.917               |316.55              |2.324                       |
+|rocket league    |sentinel  |39               |13            |39                |0.877              |0.838                |0.840               |418.65              |1.829                       |
+|rocket league    |support   |43               |13            |42                |0.760              |0.914                |0.978               |400.26              |1.459                       |
+|rocket league    |controller|43               |13            |43                |1.000              |0.615                |0.920               |337.23              |1.508                       |
+|rocket league    |duelist   |68               |17            |67                |1.451              |0.717                |1.102               |309.77              |2.100                       |
+|rocket league    |flex      |71               |21            |69                |1.232              |0.758                |0.973               |282.64              |2.139                       |
+|valorant         |controller|41               |13            |39                |1.274              |0.879                |1.005               |420.66              |2.360                       |
+|valorant         |duelist   |69               |17            |67                |1.029              |0.743                |0.898               |410.04              |1.517                       |
+|valorant         |support   |42               |12            |42                |0.950              |0.770                |0.840               |405.30              |2.196                       |
+|valorant         |sentinel  |55               |13            |54                |1.232              |0.893                |0.955               |366.81              |2.204                       |
+|valorant         |flex      |82               |20            |82                |1.406              |0.784                |0.872               |366.53              |2.479                       |
++-----------------+----------+-----------------+--------------+------------------+-------------------+---------------------+--------------------+--------------------+----------------------------+
+2026-10-26 09:51:03,096 | INFO | __main__ | SQL analytics result 'role_performance_by_game' | Total rows: 20
+2026-10-26 09:51:03,096 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\role_performance_by_game
+2026-10-26 09:51:05,304 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\role_performance_by_game
+2026-10-26 09:51:05,304 | INFO | __main__ | Spark SQL analytics completed
+2026-10-26 09:51:05,304 | INFO | __main__ | STEP 7: PARQUET READ-BACK CHECK
+2026-10-26 09:51:05,386 | INFO | __main__ | Player performance Parquet read-back schema:
+root
+ |-- player_id: string (nullable = true)
+ |-- player_name: string (nullable = true)
+ |-- team_id: string (nullable = true)
+ |-- role: string (nullable = true)
+ |-- game: string (nullable = true)
+ |-- total_kills: long (nullable = true)
+ |-- total_deaths: long (nullable = true)
+ |-- total_assists: long (nullable = true)
+ |-- total_damage: long (nullable = true)
+ |-- kills_per_round: double (nullable = true)
+ |-- assists_per_round: double (nullable = true)
+ |-- damage_per_round: double (nullable = true)
+ |-- deaths_per_round: double (nullable = true)
+ |-- kills_per_round_rank: integer (nullable = true)
+ |-- assists_per_round_rank: integer (nullable = true)
+ |-- damage_per_round_rank: integer (nullable = true)
+ |-- deaths_per_round_rank: integer (nullable = true)
+
+2026-10-26 09:51:05,514 | INFO | __main__ | Rows in saved player performance output: 304
+2026-10-26 09:51:05,626 | INFO | __main__ | Player performance Parquet read-back | Displaying up to 10 rows:
++---------+-----------+-------+----------+-----------------+-----------+------------+-------------+------------+---------------+-----------------+----------------+----------------+--------------------+----------------------+---------------------+---------------------+
+|player_id|player_name|team_id|role      |game             |total_kills|total_deaths|total_assists|total_damage|kills_per_round|assists_per_round|damage_per_round|deaths_per_round|kills_per_round_rank|assists_per_round_rank|damage_per_round_rank|deaths_per_round_rank|
++---------+-----------+-------+----------+-----------------+-----------+------------+-------------+------------+---------------+-----------------+----------------+----------------+--------------------+----------------------+---------------------+---------------------+
+|PL021    |Nova_21    |TM01   |NULL      |league of legends|90         |54          |46           |43939       |0.737          |0.368            |371.632         |0.105           |51                  |53                    |32                   |1                    |
+|PL050    |Luna_50    |TM06   |flex      |league of legends|38         |9           |39           |13544       |2.833          |2.0              |954.333         |0.167           |1                   |2                     |1                    |2                    |
+|PL067    |Rift_67    |TM04   |support   |league of legends|41         |8           |37           |6195        |1.025          |0.925            |154.875         |0.2             |37                  |20                    |66                   |3                    |
+|PL075    |Zero_75    |TM02   |flex      |league of legends|82         |43          |22           |13624       |1.125          |0.208            |209.417         |0.292           |30                  |67                    |57                   |4                    |
+|PL057    |Mako_57    |TM02   |sentinel  |league of legends|20         |6           |8            |8587        |1.0            |0.4              |429.35          |0.3             |39                  |51                    |24                   |5                    |
+|PL038    |Rift_38    |TM06   |controller|league of legends|111        |19          |49           |25225       |1.788          |0.904            |352.942         |0.308           |8                   |24                    |38                   |6                    |
+|PL059    |Viper_59   |TM05   |sentinel  |league of legends|6          |9           |7            |1589        |0.25           |0.292            |66.208          |0.375           |66                  |59                    |73                   |7                    |
+|PL016    |Pixel_16   |TM05   |controller|league of legends|29         |21          |8            |7965        |0.75           |0.25             |205.0           |0.417           |50                  |63                    |58                   |8                    |
+|PL053    |Nova_53    |TM01   |duelist   |league of legends|95         |46          |53           |29705       |1.5            |0.775            |233.375         |0.45            |14                  |31                    |54                   |9                    |
+|PL061    |Mako_61    |TM01   |flex      |league of legends|89         |68          |38           |41871       |0.708          |0.313            |435.625         |0.458           |52                  |56                    |23                   |10                   |
++---------+-----------+-------+----------+-----------------+-----------+------------+-------------+------------+---------------+-----------------+----------------+----------------+--------------------+----------------------+---------------------+---------------------+
+only showing top 10 rows
+2026-10-26 09:51:05,626 | INFO | __main__ | ======================================================================
+2026-10-26 09:51:05,626 | INFO | __main__ | PIPELINE COMPLETED SUCCESSFULLY
+2026-10-26 09:51:05,626 | INFO | __main__ | Log file: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\logs\pipeline_2026-10-26_09-49-15.log
+2026-10-26 09:51:05,626 | INFO | __main__ | ======================================================================
+2026-10-26 09:51:05,626 | INFO | __main__ | Stopping Spark session
+2026-10-26 09:51:05,790 | INFO | __main__ | Spark session stopped
+2026-10-26 09:51:05,811 | INFO | py4j.clientserver | Closing down clientserver connection

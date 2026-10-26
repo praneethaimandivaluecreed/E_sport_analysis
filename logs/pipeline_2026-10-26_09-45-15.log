@@ -1,0 +1,182 @@
+2026-10-26 09:45:15,352 | INFO | __main__ | Logging initialized
+2026-10-26 09:45:15,352 | INFO | __main__ | Log file: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\logs\pipeline_2026-10-26_09-45-15.log
+2026-10-26 09:45:15,352 | INFO | __main__ | ======================================================================
+2026-10-26 09:45:15,352 | INFO | __main__ | STARTING E-SPORT ANALYSIS PIPELINE
+2026-10-26 09:45:15,352 | INFO | __main__ | ======================================================================
+2026-10-26 09:45:21,603 | INFO | __main__ | Spark session created successfully
+2026-10-26 09:45:21,625 | INFO | __main__ | STEP 1: INGESTION
+2026-10-26 09:45:22,543 | INFO | __main__ | Raw dataset: teams
+2026-10-26 09:45:22,543 | INFO | __main__ | Counting rows for raw dataset: teams
+2026-10-26 09:45:24,491 | INFO | __main__ | Row count: 8 | Dataset: teams
+2026-10-26 09:45:24,491 | INFO | __main__ | Raw dataset: players
+2026-10-26 09:45:24,491 | INFO | __main__ | Counting rows for raw dataset: players
+2026-10-26 09:45:24,635 | INFO | __main__ | Row count: 80 | Dataset: players
+2026-10-26 09:45:24,635 | INFO | __main__ | Raw dataset: matches
+2026-10-26 09:45:24,635 | INFO | __main__ | Counting rows for raw dataset: matches
+2026-10-26 09:45:24,769 | INFO | __main__ | Row count: 402 | Dataset: matches
+2026-10-26 09:45:24,769 | INFO | __main__ | Raw dataset: player_match_stats
+2026-10-26 09:45:24,769 | INFO | __main__ | Counting rows for raw dataset: player_match_stats
+2026-10-26 09:45:24,918 | INFO | __main__ | Row count: 1803 | Dataset: player_match_stats
+2026-10-26 09:45:24,920 | INFO | __main__ | Raw dataset: match_events
+2026-10-26 09:45:24,920 | INFO | __main__ | Counting rows for raw dataset: match_events
+2026-10-26 09:45:25,225 | INFO | __main__ | Row count: 1000 | Dataset: match_events
+2026-10-26 09:45:25,225 | INFO | __main__ | STEP 2: TRANSFORMATION
+2026-10-26 09:45:26,221 | INFO | __main__ | teams: 8 transformed rows
+2026-10-26 09:45:26,499 | INFO | __main__ | players: 80 transformed rows
+2026-10-26 09:45:26,615 | INFO | __main__ | matches: 402 transformed rows
+2026-10-26 09:45:26,751 | INFO | __main__ | player_match_stats: 1803 transformed rows
+2026-10-26 09:45:26,837 | INFO | __main__ | match_events: 1000 transformed rows
+2026-10-26 09:45:26,837 | INFO | __main__ | STEP 3: DATA QUALITY VALIDATION
+2026-10-26 09:45:36,455 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_team_ids
+2026-10-26 09:45:37,424 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_team_ids
+2026-10-26 09:45:37,424 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_team_identity
+2026-10-26 09:45:37,766 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_team_identity
+2026-10-26 09:45:37,766 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_ids
+2026-10-26 09:45:38,309 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_ids
+2026-10-26 09:45:38,309 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_identity
+2026-10-26 09:45:38,966 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_identity
+2026-10-26 09:45:38,966 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_role
+2026-10-26 09:45:39,385 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_player_role
+2026-10-26 09:45:39,385 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_player_join_date
+2026-10-26 09:45:39,707 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_player_join_date
+2026-10-26 09:45:39,707 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_match_ids
+2026-10-26 09:45:40,516 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_match_ids
+2026-10-26 09:45:40,516 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_match_identity
+2026-10-26 09:45:41,171 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_match_identity
+2026-10-26 09:45:41,171 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_match_timestamps
+2026-10-26 09:45:41,542 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_match_timestamps
+2026-10-26 09:45:41,542 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_a_scores
+2026-10-26 09:45:41,870 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_a_scores
+2026-10-26 09:45:41,870 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_b_scores
+2026-10-26 09:45:42,201 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_team_b_scores
+2026-10-26 09:45:42,201 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\same_team_on_both_sides
+2026-10-26 09:45:42,519 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\same_team_on_both_sides
+2026-10-26 09:45:42,519 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_scores
+2026-10-26 09:45:43,111 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_scores
+2026-10-26 09:45:43,111 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_stat_ids
+2026-10-26 09:45:43,700 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_stat_ids
+2026-10-26 09:45:43,700 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_match_combinations
+2026-10-26 09:45:44,549 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_player_match_combinations
+2026-10-26 09:45:44,549 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_stat_identity
+2026-10-26 09:45:44,875 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_stat_identity
+2026-10-26 09:45:44,875 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_kills
+2026-10-26 09:45:45,221 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_kills
+2026-10-26 09:45:45,221 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_deaths
+2026-10-26 09:45:45,822 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_deaths
+2026-10-26 09:45:45,822 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_assists
+2026-10-26 09:45:46,170 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_assists
+2026-10-26 09:45:46,170 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_damage
+2026-10-26 09:45:46,623 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_damage
+2026-10-26 09:45:46,623 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_rounds_played
+2026-10-26 09:45:47,094 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_rounds_played
+2026-10-26 09:45:47,094 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_kills
+2026-10-26 09:45:47,426 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_kills
+2026-10-26 09:45:47,426 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_deaths_int
+2026-10-26 09:45:47,749 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_deaths_int
+2026-10-26 09:45:47,764 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_assists_int
+2026-10-26 09:45:48,073 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_assists_int
+2026-10-26 09:45:48,073 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_damage_int
+2026-10-26 09:45:48,630 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_damage_int
+2026-10-26 09:45:48,630 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_rounds_played_int
+2026-10-26 09:45:48,966 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_rounds_played_int
+2026-10-26 09:45:48,966 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_event_ids
+2026-10-26 09:45:49,481 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_event_ids
+2026-10-26 09:45:49,481 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_event_identity
+2026-10-26 09:45:50,252 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\missing_event_identity
+2026-10-26 09:45:50,252 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_event_timestamps
+2026-10-26 09:45:50,558 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\invalid_event_timestamps
+2026-10-26 09:45:50,558 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_event_durations
+2026-10-26 09:45:50,866 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\unparseable_event_durations
+2026-10-26 09:45:50,866 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_event_durations
+2026-10-26 09:45:51,199 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\negative_event_durations
+2026-10-26 09:45:51,199 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\players_with_unknown_team
+2026-10-26 09:45:51,667 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\players_with_unknown_team
+2026-10-26 09:45:51,667 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_a
+2026-10-26 09:45:52,143 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_a
+2026-10-26 09:45:52,143 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_b
+2026-10-26 09:45:52,558 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\matches_with_unknown_team_b
+2026-10-26 09:45:52,558 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_player
+2026-10-26 09:45:53,000 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_player
+2026-10-26 09:45:53,001 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_for_players_with_invalid_team
+2026-10-26 09:45:53,592 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_for_players_with_invalid_team
+2026-10-26 09:45:53,592 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_match
+2026-10-26 09:45:54,318 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\stats_with_unknown_match
+2026-10-26 09:45:54,318 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\events_with_unknown_match
+2026-10-26 09:45:54,886 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\events_with_unknown_match
+2026-10-26 09:45:54,886 | INFO | __main__ | Data quality validation completed
+2026-10-26 09:45:54,886 | INFO | __main__ | STEP 4: CLEANING AND QUARANTINE
+2026-10-26 09:45:56,071 | INFO | __main__ | Cleaned teams: 8 rows
+2026-10-26 09:45:56,071 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\teams
+2026-10-26 09:45:56,679 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\teams
+2026-10-26 09:45:56,955 | INFO | __main__ | Cleaned players: 79 rows
+2026-10-26 09:45:56,955 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\players
+2026-10-26 09:45:57,413 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\players
+2026-10-26 09:45:57,947 | INFO | __main__ | Cleaned matches: 399 rows
+2026-10-26 09:45:57,947 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\matches
+2026-10-26 09:45:58,511 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\matches
+2026-10-26 09:46:00,957 | INFO | __main__ | Cleaned player_match_stats: 1670 rows
+2026-10-26 09:46:00,957 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\player_match_stats
+2026-10-26 09:46:03,771 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\player_match_stats
+2026-10-26 09:46:04,754 | INFO | __main__ | Cleaned match_events: 997 rows
+2026-10-26 09:46:04,754 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\match_events
+2026-10-26 09:46:05,742 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\cleaned\match_events
+2026-10-26 09:46:06,111 | WARNING | __main__ | Quarantined teams: 0 rows
+2026-10-26 09:46:06,111 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\teams
+2026-10-26 09:46:06,677 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\teams
+2026-10-26 09:46:07,380 | WARNING | __main__ | Quarantined players: 1 rows
+2026-10-26 09:46:07,380 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\players
+2026-10-26 09:46:08,098 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\players
+2026-10-26 09:46:09,002 | WARNING | __main__ | Quarantined matches: 3 rows
+2026-10-26 09:46:09,002 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\matches
+2026-10-26 09:46:10,109 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\matches
+2026-10-26 09:46:12,414 | WARNING | __main__ | Quarantined player_match_stats: 133 rows
+2026-10-26 09:46:12,425 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\player_match_stats
+2026-10-26 09:46:15,073 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\player_match_stats
+2026-10-26 09:46:16,724 | WARNING | __main__ | Quarantined match_events: 3 rows
+2026-10-26 09:46:16,724 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\match_events
+2026-10-26 09:46:18,034 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quarantined\match_events
+2026-10-26 09:46:18,034 | INFO | __main__ | Cleaning and quarantine completed
+2026-10-26 09:46:18,034 | INFO | __main__ | STEP 5: DATAFRAME ANALYTICS
+2026-10-26 09:46:19,194 | INFO | __main__ | Displaying analytics result: team_performance
+2026-10-26 09:46:20,048 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_performance
+2026-10-26 09:46:20,851 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_performance
+2026-10-26 09:46:20,851 | INFO | __main__ | Displaying analytics result: player_performance
+2026-10-26 09:46:23,173 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\player_performance
+2026-10-26 09:46:26,466 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\player_performance
+2026-10-26 09:46:26,466 | INFO | __main__ | Displaying analytics result: events_by_game_type
+2026-10-26 09:46:27,406 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_game_type
+2026-10-26 09:46:29,025 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_game_type
+2026-10-26 09:46:29,025 | INFO | __main__ | Displaying analytics result: events_by_month
+2026-10-26 09:46:29,870 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_month
+2026-10-26 09:46:31,060 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\events_by_month
+2026-10-26 09:46:31,060 | INFO | __main__ | Displaying analytics result: event_durations
+2026-10-26 09:46:32,075 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_durations
+2026-10-26 09:46:33,086 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_durations
+2026-10-26 09:46:33,086 | INFO | __main__ | Displaying analytics result: event_exposure_by_team
+2026-10-26 09:46:34,216 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_exposure_by_team
+2026-10-26 09:46:35,784 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\event_exposure_by_team
+2026-10-26 09:46:35,784 | INFO | __main__ | Displaying analytics result: team_form_over_time
+2026-10-26 09:46:36,575 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_form_over_time
+2026-10-26 09:46:37,750 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\analytics\team_form_over_time
+2026-10-26 09:46:37,750 | INFO | __main__ | DataFrame analytics completed
+2026-10-26 09:46:37,750 | INFO | __main__ | STEP 6: SPARK SQL ANALYTICS
+2026-10-26 09:46:43,926 | INFO | __main__ | Saving SQL analytics result: match_outcomes_by_game
+2026-10-26 09:46:43,926 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\match_outcomes_by_game
+2026-10-26 09:46:44,819 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\match_outcomes_by_game
+2026-10-26 09:46:44,819 | INFO | __main__ | Saving SQL analytics result: event_intensity_by_game
+2026-10-26 09:46:44,819 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\event_intensity_by_game
+2026-10-26 09:46:46,198 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\event_intensity_by_game
+2026-10-26 09:46:46,198 | INFO | __main__ | Saving SQL analytics result: role_performance_by_game
+2026-10-26 09:46:46,198 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\role_performance_by_game
+2026-10-26 09:46:48,717 | INFO | __main__ | Successfully saved Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\sql_analytics\role_performance_by_game
+2026-10-26 09:46:48,718 | INFO | __main__ | Spark SQL analytics completed
+2026-10-26 09:46:48,718 | INFO | __main__ | STEP 7: PARQUET READ-BACK CHECK
+2026-10-26 09:46:48,808 | INFO | __main__ | Player performance Parquet schema:
+2026-10-26 09:46:48,951 | INFO | __main__ | Rows in saved player performance output: 304
+2026-10-26 09:46:49,036 | INFO | __main__ | ======================================================================
+2026-10-26 09:46:49,036 | INFO | __main__ | PIPELINE COMPLETED SUCCESSFULLY
+2026-10-26 09:46:49,036 | INFO | __main__ | Log file: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\logs\pipeline_2026-10-26_09-45-15.log
+2026-10-26 09:46:49,036 | INFO | __main__ | ======================================================================
+2026-10-26 09:46:49,036 | INFO | __main__ | Stopping Spark session
+2026-10-26 09:46:49,238 | INFO | __main__ | Spark session stopped
+2026-10-26 09:46:49,238 | INFO | py4j.clientserver | Closing down clientserver connection
