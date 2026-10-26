@@ -1,44 +1,24 @@
+
 # Esports Tournament Analytics
 
 ## 1. Project Overview
 
-This project analyses esports tournament data using  Apache PySpark, and Spark SQL. The objective is to produce reliable team and player performance metrics while identifying data-quality problems that may affect the interpretation of tournament results.
+This project uses **Apache PySpark and Spark SQL** to analyse esports tournament data while identifying data-quality issues that could affect analytical results.
 
-The project works with five datasets covering teams, players, matches, player-match statistics, and match events. It implements data ingestion, transformation, validation, cleaning, quarantine handling, analytical processing, and Parquet output generation.
+The pipeline covers ingestion, transformation, validation, cleaning, quarantine, analytics, and Parquet output generation across five datasets.
 
-### Objectives
+## 2. Technologies
 
-- Profile the quality and consistency of the supplied datasets.
-- Identify duplicate records, invalid values, missing fields, and unmatched references.
-- Preserve questionable records for investigation through quality-issue and quarantine outputs.
-- Calculate team and player performance metrics.
-- Analyse match events and team performance over time.
-- Use Spark SQL and DataFrame transformations for analytical questions.
-- Apply window functions for ranking and rolling performance calculations.
-- Inspect Spark execution plans and save analytical results in Parquet format.
-
-## 2. Technologies Used
-
-- Python
-- Apache PySpark
+- Python and PySpark
 - Spark SQL
-- CSV
-- Apache Parquet
+- CSV and Apache Parquet
 - Pytest
-
 
 ## 3. Project Structure
 
 ```text
 E_sport_analysis/
-│
-├── data/
-│   ├── teams.csv
-│   ├── players.csv
-│   ├── matches.csv
-│   ├── player_match_stats.csv
-│   └── match_events.csv
-│
+├── data/                  # Five input CSV files
 ├── src/
 │   ├── ingest.py
 │   ├── transform.py
@@ -47,253 +27,157 @@ E_sport_analysis/
 │   ├── analytics.py
 │   ├── sql_analytics.py
 │   └── main.py
-│
 ├── tests/
 │   └── test_esport_project.py
-│
-├── outputs/
-│   ├── analytics/
-│   ├── cleaned/
-│   ├── quality_issues/
-│   ├── quarantined/
-│   └── sql_analytics/
+├── logs/                  # Timestamped pipeline logs
+└── outputs/
+    ├── analytics/
+    ├── cleaned/
+    ├── quality_issues/
+    ├── quarantined/
+    └── sql_analytics/
 ```
 
-## 4. Input Datasets
+## 4. Input Data
 
-| Dataset | Description |
+| Dataset | Initial rows | Purpose |
+|---|---:|---|
+| `teams.csv` | 8 | Team identities and details |
+| `players.csv` | 80 | Players, roles, teams and statuses |
+| `matches.csv` | 402 | Match details, scores and statuses |
+| `player_match_stats.csv` | 1,803 | Player kills, deaths, assists, damage and rounds |
+| `match_events.csv` | 1,000 | Match events, timestamps and durations |
+| **Total** | **3,293** | |
+
+These counts are from the pipeline log recorded on October 26, 2026.
+
+## 5. Pipeline Workflow
+
+The pipeline in `src/main.py` executes these stages:
+
+1. **Ingestion:** Reads the five CSV datasets using explicit schemas.
+2. **Transformation:** Trims text, standardises selected categories, parses timestamps and casts numeric values while retaining source values.
+3. **Validation:** Checks duplicates, missing fields, invalid values, negative metrics and unmatched references.
+4. **Cleaning and quarantine:** Separates records accepted by cleaning rules from records requiring investigation.
+5. **DataFrame analytics:** Calculates team and player performance, event summaries and team form.
+6. **Spark SQL:** Executes three analytical queries using temporary views.
+7. **Output and read-back:** Saves Parquet datasets and checks that player-performance output can be read again.
+8. **Cleanup:** Stops the Spark session.
+
+## 6. Data Quality and Cleaning Results
+
+The validation module checks duplicate IDs and player-match combinations, missing identities and roles, invalid timestamps, unparseable or negative numeric values, same-team matches, and unknown team, player or match references.
+
+The pipeline log confirms that the corresponding quality-issue Parquet outputs were saved. Individual issue counts were not included in the supplied log, so they must be obtained from those output datasets before reporting exact counts.
+
+### Cleaning summary
+
+| Dataset | Input rows | Cleaned rows | Quarantined rows |
+|---|---:|---:|---:|
+| Teams | 8 | 8 | 0 |
+| Players | 80 | 79 | 1 |
+| Matches | 402 | 399 | 3 |
+| Player-match statistics | 1,803 | 1,670 | 133 |
+| Match events | 1,000 | 997 | 3 |
+| **Total** | **3,293** | **3,153** | **140** |
+
+The logged counts reconcile: 3,153 cleaned rows + 140 quarantined rows = 3,293 input rows.
+
+Approximately 95.75% of input rows were retained in cleaned outputs. Player-match statistics account for 133 of the 140 quarantined rows, making this dataset a priority for reviewing data-quality rules.
+
+Quarantined records are preserved with a `quarantine_reason`. Quality-issue outputs record validation findings, whereas quarantine outputs preserve records rejected by the cleaning rules. The exact reason counts should be confirmed from the generated outputs; issue categories can overlap and should not be summed as unique affected records.
+
+## 7. Analytics and Window Functions
+
+The reusable calculations in `src/analytics.py` include:
+
+- **Team performance:** Represents both participating teams consistently, then calculates matches played, wins, losses, draws and win rate for eligible completed matches with usable scores.
+- **Player performance:** Joins player statistics with player and match data, then calculates kills, deaths, assists, damage and per-round metrics. Rankings support comparisons, but should be interpreted within appropriate games or roles.
+- **Event analysis:** Summarises events by game type, month, duration and team exposure. These patterns do not establish causation.
+- **Team form:** Orders match results chronologically and calculates recent performance over the latest three matches.
+
+Window calculations support player rankings and rolling team form without collapsing all records into one aggregate. Ordering, partitioning and tie-handling affect the results and should be reviewed in the implementation.
+
+## 8. Spark SQL Analytics
+
+`src/sql_analytics.py` registers temporary views and produces three SQL outputs:
+
+1. `match_outcomes_by_game`
+2. `event_intensity_by_game`
+3. `role_performance_by_game`
+
+The queries use joins, grouping, conditional aggregation and common table expressions. The match-outcomes SQL result is compared with a DataFrame result using `exceptAll` and an assertion. Agreement should be claimed only when the comparison passes.
+
+## 9. Execution Plans and Performance
+
+The pipeline calls `explain("formatted")` for team-performance and player-performance calculations.
+
+Execution plans can reveal the physical join strategies, aggregation operators, exchanges/shuffles and repeated work selected by Spark. Joins, aggregations and window calculations may require data movement, depending on the plan and configuration.
+
+**Before final submission:** inspect the actual formatted plans and document the operators observed. The supplied log confirms the analytics ran, but does not contain the plan text needed to substantiate specific join or shuffle claims.
+
+## 10. Output Data and Why Parquet?
+
+| Output directory | Contents |
 |---|---|
-| `teams.csv` | Team identities, names, regions, and coaches |
-| `players.csv` | Player identities, team references, roles, join dates, and statuses |
-| `matches.csv` | Match timestamps, games, participating teams, scores, and match statuses |
-| `player_match_stats.csv` | Player-level kills, deaths, assists, damage, and rounds played |
-| `match_events.csv` | Match-linked events, timestamps, event types, and durations |
-
-The initial dataset sizes observed during ingestion were:
-
-| Dataset | Rows |
-|---|---:|
-| Teams | 8 |
-| Players | 80 |
-| Matches | 402 |
-| Player-match statistics | 1,803 |
-| Match events | 1,000 |
-
-## 5. Pipeline Architecture
-
-The main pipeline is implemented in `src/main.py`.
-
-The workflow follows these stages:
-
-1. **Ingestion:** Load the five CSV datasets using PySpark.
-2. **Transformation:** Standardise selected text fields and create parsed timestamp and numeric columns.
-3. **Validation:** Identify data-quality issues and unmatched relationships.
-4. **Cleaning and quarantine:** Separate records that satisfy the cleaning rules from records requiring investigation.
-5. **DataFrame analytics:** Calculate team performance, player performance, event summaries, and team form over time.
-6. **Spark SQL analytics:** Execute analytical queries using temporary views.
-7. **Output generation:** Save quality issues, cleaned datasets, quarantined records, and analytical results as Parquet.
-8. **Resource cleanup:** Stop the Spark session when pipeline execution finishes.
-
-## 6. Ingestion and Transformation
-
-### Ingestion
-
-The `src/ingest.py` module defines explicit schemas for the five datasets and provides reusable functions for reading the CSV files.
-
-The input columns are initially represented as strings. This preserves the original source values so malformed timestamps and numeric values can be investigated rather than being silently converted during ingestion.
-
-The ingestion process checks that the expected files exist before reading them.
-
-### Transformation
-
-The `src/transform.py` module performs standardisation and type preparation.
-
-The transformations include:
-
-- Trimming text values.
-- Converting blank strings to null values.
-- Standardising selected category fields, such as roles, statuses, games, and event types.
-- Parsing player join dates and match/event timestamps.
-- Creating integer-cast columns for scores and player/event metrics.
-- Retaining original columns alongside parsed or cast columns.
-
-Invalid conversions can produce null values in the derived columns. The original source values remain available for validation and investigation.
-
-## 7. Data Quality Validation
-
-The `src/validate.py` module checks data quality before cleaning.
-
-The checks cover:
-
-- Duplicate team, player, match, statistic, and event identifiers.
-- Missing required values and keys.
-- Missing player roles.
-- Invalid timestamps and numeric values.
-- Negative values where non-negative metrics are expected.
-- Teams appearing on both sides of a match.
-- Unknown team, player, and match references.
-- Duplicate player-match statistic records.
-
-The `validate_all_datasets()` function coordinates the validation checks, while `show_issue_summary()` displays the resulting issue counts.
-
-An issue count does not necessarily represent the number of unique affected records. A single record can violate multiple rules, and duplicate-key checks can identify multiple rows associated with a duplicated key.
-
-## 8. Cleaning and Quarantine
-
-The `src/clean.py` module contains dataset-specific cleaning functions and reusable helpers for identifying records that should not proceed into the relevant cleaned dataset.
-
-The cleaning process addresses:
-
-- Exact duplicate records.
-- Missing required identity fields.
-- Invalid records according to the defined cleaning rules.
-- Unknown references between related datasets.
-
-Quarantined records receive a `quarantine_reason` describing why they were rejected.
-
-This approach makes questionable records available for review instead of silently discarding them. The quality-issue outputs and quarantine outputs serve different purposes: quality outputs document validation findings, while quarantine outputs preserve records rejected by cleaning rules.
-
-## 9. DataFrame Analytics
-
-The `src/analytics.py` module contains reusable functions for the main analytical calculations.
-
-### Team Performance
-
-Completed matches with usable scores are represented from each participating team's perspective.
-
-Team A and Team B records are combined into a consistent team-level representation. The resulting aggregation calculates:
-
-- Matches played.
-- Wins.
-- Losses.
-- Draws.
-- Win-rate percentage.
-
-Representing both sides consistently allows team results to be aggregated without treating Team A and Team B differently.
-
-### Player Performance
-
-Player statistics are joined with match and player information. The analysis filters to completed matches and aggregates statistics by player and game.
-
-Metrics include:
-
-- Total kills.
-- Total deaths.
-- Total assists.
-- Total damage.
-- Kills per round.
-- Assists per round.
-- Damage per round.
-- Deaths per round.
-
-Per-round metrics help account for differences in the number of rounds played. They should still be interpreted within an appropriate game or role because scoring systems and gameplay differ between games.
-
-The module also ranks players using performance metrics. Deaths per round are ranked in ascending order so lower values receive better ranks.
-
-### Match Event Analysis
-
-Event analysis summarises match events using several perspectives:
-
-- Events by game type.
-- Events by month.
-- Event durations.
-- Event exposure by team.
-
-These summaries help identify patterns in the available event records. They do not, by themselves, establish that an event caused a particular match result.
-
-### Team Form Over Time
-
-The project calculates chronological team records and a rolling win rate based on each team's most recent three matches.
-
-This provides a view of recent team performance in addition to overall win rate. The interpretation depends on consistent chronological ordering and the handling of matches with identical timestamps.
-
-## 10. Window Functions
-
-Window functions are used to calculate rankings and time-based performance measures.
-
-The player-performance analysis includes rankings for kills per round, assists per round, damage per round, and deaths per round.
-
-The team-form analysis uses chronological window calculations to track match sequence and rolling performance over the most recent three matches.
-
-These calculations allow comparisons across player groups and changes in team performance over time without collapsing all records into a single overall aggregate.
-
-## 11. Spark SQL Analytics
-
-The `src/sql_analytics.py` module registers temporary views for the teams, players, matches, player-match statistics, and match-event datasets.
-
-It implements three Spark SQL analyses:
-
-1. Match outcomes by game.
-2. Event intensity by game.
-3. Role performance by game.
-
-The SQL queries use operations such as joins, common table expressions, conditional aggregation, grouping, and ordering.
-
-For the match-outcomes analysis, the project compares the SQL result against a corresponding DataFrame-based calculation using `exceptAll` and an assertion.
-
-The comparison must pass during execution before the SQL/DataFrame agreement can be reported as verified.
-
-## 12. Execution Plans and Performance
-
-The project calls `explain("formatted")` for two substantial DataFrame analytics:
-
-- Team performance.
-- Player performance.
-
-These execution plans help inspect the physical operations selected by Spark.
-
-Joins, aggregations, and window calculations can introduce data exchanges or shuffle stages. The actual operators and shuffle behaviour depend on the query plan, input data, Spark configuration, and available statistics.
-
-The execution plans are printed during execution. They should be reviewed to explain the selected join strategies, aggregation stages, exchanges, and any repeated work.
-
-## 13. Output Datasets
-
-The pipeline writes outputs beneath the `outputs/` directory.
-
-| Directory | Purpose |
-|---|---|
-| `outputs/quality_issues/` | Validation issue datasets |
-| `outputs/cleaned/` | Cleaned datasets |
+| `outputs/cleaned/` | Records accepted by cleaning rules |
 | `outputs/quarantined/` | Rejected records and quarantine reasons |
-| `outputs/analytics/` | DataFrame-based analytical datasets |
-| `outputs/sql_analytics/` | Spark SQL analytical datasets |
+| `outputs/quality_issues/` | Validation findings |
+| `outputs/analytics/` | DataFrame analytical results |
+| `outputs/sql_analytics/` | Spark SQL results |
 
-The analytical outputs include team performance, player performance, team form over time, and event summaries.
+### Why Parquet suits this project
 
-The pipeline uses Parquet output with overwrite mode. Running the pipeline again replaces output data at the corresponding destinations.
+Parquet is a **columnar format** suited to analytical workloads. In this project it:
 
-### Why Parquet?
+- Stores schema and typed values for downstream processing.
+- Supports column pruning when queries need only selected fields.
+- Supports compression, potentially reducing storage and read I/O.
+- Allows cleaned and aggregated datasets to be reused without repeatedly parsing the source CSV files.
 
-Parquet is a columnar storage format suitable for analytical workloads. It stores schema information and supports efficient access to selected columns, making it useful for repeatedly querying cleaned and aggregated datasets without reparsing the original CSV files.
+Parquet does not guarantee correct results or automatically eliminate expensive joins and shuffles. Actual performance depends on query patterns, data layout and execution plans.
 
-Spark generally writes Parquet datasets as directories containing one or more part files rather than as a single standalone file.
+Spark generally writes Parquet datasets as directories containing one or more `part-*.parquet` files. In the recorded run, the saved player-performance dataset was read back successfully with **304 rows**. This verifies basic read-back, not the correctness of every analytical metric.
 
-## 14. Running the Project
+The pipeline uses overwrite mode, so rerunning it replaces existing output data at the relevant destinations.
 
-Run the commands from the project root directory.
+## 11. Logging Evidence
 
-### Execute the pipeline
+The recorded run shows that:
+
+- All five input datasets were read and transformed without a row-count change during transformation.
+- Validation and cleaning/quarantine stages completed.
+- The DataFrame and SQL analytical outputs were saved.
+- The player-performance Parquet output was read back with 304 rows.
+- The pipeline completed and stopped the Spark session.
+
+These observations demonstrate successful execution of the recorded run, but do not independently prove every business rule or metric is correct.
+
+## 12. Running the Project
+
+Run from the project root:
 
 ```bash
 python src/main.py
 ```
 
-The script resolves the project root and expects the source CSV files in the `data/` directory. Generated outputs are written under `outputs/`.
-
-If working from inside the `src/` directory, the equivalent command is:
+To run the tests, when the dependencies are installed:
 
 ```bash
-python main.py
+pytest
 ```
 
-## 15. Assumptions and Limitations
+The pipeline expects the source CSV files under `data/` and writes logs and outputs within the project directory.
 
-- Original source columns are retained alongside derived parsed or cast columns where applicable.
-- Failed numeric or timestamp conversions are represented as null in the derived columns and are subject to validation.
-- Cleaning and quarantine decisions are based on explicit rules implemented in the cleaning module.
-- Team win-rate calculations depend on the definition of eligible completed matches and valid scores.
-- Player metrics should be compared within relevant game or role groups where scoring systems differ.
-- Event summaries identify patterns but do not establish causation.
-- Rolling team performance depends on the chronological ordering of match records.
-- Validation issue counts may overlap and should not be summed as though every issue represents a different record.
+## 13. Assumptions and Limitations
 
+- Failed timestamp and numeric conversions become null in derived columns and are subject to validation.
+- Cleaning and quarantine decisions follow the rules implemented in `src/clean.py`.
+- Team win rates depend on eligible match definitions and valid scores.
+- Player metrics may not be directly comparable across games or roles.
+- Event summaries identify patterns, not causal effects.
+- Rolling team form depends on chronological ordering and tie-handling.
+- Validation issue counts can overlap.
+- Cleaned/quarantined count reconciliation does not alone prove correct classification.
+
+Before submission, inspect individual quality-issue counts, quarantine reasons, actual execution plans, test results and analytical values. Document business findings only when supported by the generated outputs.
