@@ -1,4 +1,8 @@
 from pathlib import Path
+from datetime import datetime
+from contextlib import redirect_stdout
+from io import StringIO
+import logging
 
 from ingest import create_spark_session, load_all_datasets
 from transform import transform_all_datasets
@@ -26,6 +30,144 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 # All quality reports, cleaned datasets, quarantined records,
 # and analytics results will be written under this directory.
 OUTPUT_DIR = PROJECT_ROOT / "outputs"
+LOG_DIR = PROJECT_ROOT / "logs"
+
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+LOG_FILE = LOG_DIR / f"pipeline_{timestamp}.log"
+
+
+# ============================================================
+# LOGGING CONFIGURATION
+# ============================================================
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_FILE, encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
+    force=True,
+)
+
+logger = logging.getLogger(__name__)
+
+logger.info("Logging initialized")
+logger.info("Log file: %s", LOG_FILE)
+
+
+# ============================================================
+# HELPER: LOG DATAFRAME SCHEMA
+# ============================================================
+
+def log_schema(df, label: str) -> None:
+    """Write a readable DataFrame schema to the terminal and log file."""
+
+    schema_text = df.schema.treeString()
+
+    logger.info(
+        "%s schema:\n%s",
+        label,
+        schema_text,
+    )
+
+
+# ============================================================
+# HELPER: LOG DATAFRAME TABLE
+# ============================================================
+
+def log_dataframe(df, label: str, n: int = 20,
+                  truncate: bool = False) -> None:
+    """
+    Capture df.show() output and write it through the logger.
+
+    The table will appear in both the terminal and the log file.
+    Only the first n rows are displayed.
+    """
+
+    buffer = StringIO()
+
+    with redirect_stdout(buffer):
+        df.show(n=n, truncate=truncate)
+
+    table_output = buffer.getvalue().rstrip()
+
+    logger.info(
+        "%s | Displaying up to %s rows:\n%s",
+        label,
+        n,
+        table_output if table_output else "(No table output)",
+    )
+
+
+# ============================================================
+# HELPER: LOG VALIDATION SUMMARY
+# ============================================================
+
+def log_validation_summary(quality_issues: dict) -> None:
+    """Log the number of rows flagged by each quality check."""
+
+    logger.info("=" * 60)
+    logger.info("DATA QUALITY ISSUE SUMMARY")
+    logger.info("=" * 60)
+
+    total_issue_rows = 0
+
+    for issue_name, issue_df in quality_issues.items():
+        issue_count = issue_df.count()
+        total_issue_rows += issue_count
+
+        if issue_count > 0:
+            logger.warning(
+                "Quality check '%s': %s flagged rows",
+                issue_name,
+                issue_count,
+            )
+        else:
+            logger.info(
+                "Quality check '%s': no flagged rows",
+                issue_name,
+            )
+
+    logger.info(
+        "Sum of flagged rows across quality checks: %s",
+        total_issue_rows,
+    )
+    logger.info(
+        "Note: this is a sum across checks; a record may be flagged "
+        "by more than one check."
+    )
+
+
+# ============================================================
+# HELPER: CAPTURE EXISTING VALIDATION SUMMARY
+# ============================================================
+
+def log_existing_issue_summary(quality_issues: dict) -> None:
+    """
+    Capture the existing show_issue_summary() output.
+
+    This preserves the existing validation-summary function.
+    """
+
+    buffer = StringIO()
+
+    with redirect_stdout(buffer):
+        show_issue_summary(quality_issues)
+
+    summary_output = buffer.getvalue().rstrip()
+
+    if summary_output:
+        logger.info(
+            "Validation summary output:\n%s",
+            summary_output,
+        )
+    else:
+        logger.info(
+            "The existing validation summary produced no stdout output."
+        )
 
 
 
@@ -37,39 +179,32 @@ def save_parquet(df, output_name):
     # inside the project's outputs directory.
     output_path = OUTPUT_DIR / output_name
 
-    # Write the Spark DataFrame to Parquet format.
-    # mode("overwrite") replaces existing output at this path.
-    # parquet() writes the DataFrame using the Parquet file format.
-    # str() converts the Path object to a string for Spark.
     (
         df.write
         .mode("overwrite")
         .parquet(str(output_path))
     )
 
-    # Print the destination so we know where the DataFrame was saved.
     print(f"Saved Parquet output: {output_path}")
 
 
 # START OF MAIN PIPELINE
 def main():
 
-    # Create the Spark session before performing any Spark operations.
-    # The session provides the entry point for reading data,
-    # transforming DataFrames, executing SQL, and writing outputs.
+def main() -> None:
     spark = create_spark_session()
 
     # Use try/finally to ensure Spark is stopped even if an error occurs
     # during ingestion, transformation, validation, cleaning, or analytics.
     try:
-
-        # Create the outputs directory if it does not already exist.
-        # parents=True creates missing parent directories when necessary.
-        # exist_ok=True prevents an error if the directory already exists.
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+        spark = create_spark_session()
+        logger.info("Spark session created successfully")
 
-        # INGEST RAW CSV DATASETS
+        # ----------------------------------------------------
+        # STEP 1: INGEST RAW CSV DATASETS
+        # ----------------------------------------------------
         print("\n" + "=" * 70)
         print("STEP 1: INGESTION")
         print("=" * 70)
@@ -82,23 +217,13 @@ def main():
         # Inspect every raw dataset before proceeding.
         # name is the dataset name, and df is its corresponding DataFrame.
         for name, df in raw_data.items():
-
-            # Display which raw dataset is being inspected.
             print(f"\nRaw dataset: {name}")
-
-            # Count the number of records in this dataset.
-            # count() is an action, so Spark executes the work needed
-            # to calculate the row count.
             print(f"Row count: {df.count()}")
-
-            # Display the column names, data types, and nullability information.
-            # This helps us inspect the schema Spark inferred or received.
             df.printSchema()
 
-        
-        # TRANSFORM RAW DATA
-
-        # Print the heading for the transformation stage.
+        # ----------------------------------------------------
+        # STEP 2: TRANSFORM RAW DATA
+        # ----------------------------------------------------
         print("\n" + "=" * 70)
         print("STEP 2: TRANSFORMATION")
         print("=" * 70)
@@ -112,14 +237,13 @@ def main():
         # Report the number of rows in every transformed dataset.
         # This helps us inspect the output of the transformation stage.
         for name, df in transformed_data.items():
-
-            # count() evaluates the DataFrame to determine its row count.
             print(f"{name}: {df.count()} transformed rows")
 
 
         # STEP 3: DATA QUALITY VALIDATION
         # Validate before cleaning so source problems remain
         # visible in the quality report.
+        # ----------------------------------------------------
         print("\n" + "=" * 70)
         print("STEP 3: DATA QUALITY VALIDATION")
         print("=" * 70)
@@ -132,12 +256,9 @@ def main():
         # identified and reported before cleaning changes the data.
         quality_issues = validate_all_datasets(transformed_data)
 
-        # Display a summary of the validation issues.
-        # The implementation of this summary is defined in validate.py.
         show_issue_summary(quality_issues)
 
-        # Save each validation issue DataFrame separately.
-        # issue_name identifies the issue, and issue_df contains its records.
+        # Save individual validation issue DataFrames.
         for issue_name, issue_df in quality_issues.items():
 
             # Save the issue DataFrame inside the quality_issues directory.
@@ -147,13 +268,12 @@ def main():
                 f"quality_issues/{issue_name}",
             )
 
-  
-        # CLEANING AND QUARANTINE
+        # ----------------------------------------------------
+        # STEP 4: CLEANING AND QUARANTINE
         # clean_all_datasets returns nested dictionaries:
-        #   cleaning_result["cleaned"]
-        #   cleaning_result["quarantined"]
-
-        # Print the heading for the cleaning and quarantine stage.
+        #   cleaned_data["cleaned"]
+        #   cleaned_data["quarantined"]
+        # ----------------------------------------------------
         print("\n" + "=" * 70)
         print("STEP 4: CLEANING AND QUARANTINE")
         print("=" * 70)
@@ -181,7 +301,12 @@ def main():
             # Count the records remaining in the cleaned DataFrame.
             # This helps us inspect the size of each cleaned dataset.
             row_count = df.count()
-            print(f"Cleaned {name}: {row_count} rows")
+
+            logger.info(
+                "Cleaned dataset: %s | Rows: %s",
+                name,
+                row_count,
+            )
 
             # Save each cleaned dataset to its own Parquet output directory.
             # For example, the matches DataFrame is saved under cleaned/matches.
@@ -196,7 +321,18 @@ def main():
             # Count the records separated into quarantine.
             # This helps us understand how many records were quarantined.
             row_count = df.count()
-            print(f"Quarantined {name}: {row_count} rows")
+
+            if row_count > 0:
+                logger.warning(
+                    "Quarantined dataset: %s | Rows: %s",
+                    name,
+                    row_count,
+                )
+            else:
+                logger.info(
+                    "Quarantined dataset: %s | Rows: 0",
+                    name,
+                )
 
             # Save each quarantined DataFrame separately.
             # Keeping quarantine outputs separate preserves access to
@@ -206,8 +342,9 @@ def main():
                 f"quarantined/{name}",
             )
 
-
-        #DATAFRAME ANALYTICS
+        # ----------------------------------------------------
+        # STEP 5: DATAFRAME ANALYTICS
+        # ----------------------------------------------------
         print("\n" + "=" * 70)
         print("STEP 5: DATAFRAME ANALYTICS")
         print("=" * 70)
@@ -297,14 +434,9 @@ def main():
         # Loop through every analytics result.
         # name is the output name, and df is the result DataFrame.
         for name, df in dataframe_results.items():
-
-            # Print a separator and a readable heading for the result.
             print(f"\n{'=' * 70}")
             print(name.replace("_", " ").upper())
             print("=" * 70)
-
-            # Display the first 30 rows of the result.
-            # truncate=False keeps long column values from being shortened.
             df.show(30, truncate=False)
 
             # Save this analytics result to its own Parquet output path.
@@ -314,8 +446,9 @@ def main():
                 f"analytics/{name}",
             )
 
-
+        # ----------------------------------------------------
         # STEP 6: SPARK SQL ANALYTICS
+        # ----------------------------------------------------
         print("\n" + "=" * 70)
         print("STEP 6: SPARK SQL ANALYTICS")
         print("=" * 70)
@@ -337,23 +470,18 @@ def main():
         # Save every SQL analytics result to Parquet.
         # Each result is stored separately under sql_analytics.
         for name, df in sql_results.items():
-
-            # Use the result name to create its output path.
             save_parquet(
                 df,
                 f"sql_analytics/{name}",
             )
 
-        #  READ BACK A PARQUET OUTPUT
-
-        # Print the heading for the Parquet read-back check.
+        # ----------------------------------------------------
+        # STEP 7: READ BACK A PARQUET OUTPUT
+        # ----------------------------------------------------
         print("\n" + "=" * 70)
         print("STEP 7: PARQUET READ-BACK CHECK")
         print("=" * 70)
 
-        # Build the path to the saved player performance analytics output.
-        # This is the same output location used in STEP 5 when saving
-        # the player_performance DataFrame.
         player_output_path = OUTPUT_DIR / "analytics/player_performance"
 
         # Read the saved Parquet output back into a new Spark DataFrame.
@@ -362,30 +490,32 @@ def main():
             str(player_output_path)
         )
 
-        # Display the schema of the DataFrame read from Parquet.
-        # This allows us to inspect the saved column names and data types.
         print("Player performance Parquet schema:")
         player_parquet.printSchema()
 
-        # Count the records in the saved Parquet output.
-        # This lets us inspect how many rows were written and can be read back.
         print(
             "Rows in saved player performance output:",
             player_parquet.count(),
         )
 
-        # Display the first 10 rows from the saved Parquet output.
-        # This gives a quick visual check of the stored records.
         player_parquet.show(10, truncate=False)
 
-        # Print the success message after all pipeline steps complete.
         print("\nPipeline completed successfully.")
 
     # Always stop Spark when execution leaves the try block,
     # whether the pipeline finishes successfully or an exception occurs.
     # This releases Spark resources and shuts down the Spark session.
     finally:
-        spark.stop()
+        if spark is not None:
+            logger.info("Stopping Spark session")
+
+            try:
+                spark.stop()
+                logger.info("Spark session stopped")
+            except Exception:
+                logger.exception(
+                    "Error while stopping Spark session"
+                )
 
 
 if __name__ == "__main__":
