@@ -1,37 +1,17 @@
-
 from pathlib import Path
 
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType
 
 
-# ---------------------------------------------------------
-# 1. PROJECT PATHS
-# ---------------------------------------------------------
-
-# This file is inside the src folder.
-# parents[1] takes us to the project root: E_sport_analysis.
+# project root directory
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-# All five source CSV files are stored in the data folder.
+# source csv files directory
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data"
 
 
-# ---------------------------------------------------------
-# 2. EXPLICIT SOURCE SCHEMAS
-# ---------------------------------------------------------
-
-# We initially read every source column as a string.
-#
-# Why?
-# Our data contains values such as "unknown", "N/A",
-# "TBD", "??", and negative numbers where they may be invalid.
-#
-# Keeping raw values as strings lets later functions decide
-# which values are valid and how they should be converted.
-#
-# These schemas also define the expected column names and order.
-
+# defining schema for teams data
 TEAMS_SCHEMA = StructType([
     StructField("team_id", StringType(), True),
     StructField("team_name", StringType(), True),
@@ -39,6 +19,12 @@ TEAMS_SCHEMA = StructType([
     StructField("coach", StringType(), True),
 ])
 
+
+# initially keeping all columns as StringType
+# because some columns may contain invalid values during type conversion
+# these values will be validated and handled in later stages
+
+# defining schema for players data
 PLAYERS_SCHEMA = StructType([
     StructField("player_id", StringType(), True),
     StructField("player_name", StringType(), True),
@@ -48,6 +34,7 @@ PLAYERS_SCHEMA = StructType([
     StructField("status", StringType(), True),
 ])
 
+# defining schema for matches data
 MATCHES_SCHEMA = StructType([
     StructField("match_id", StringType(), True),
     StructField("match_time", StringType(), True),
@@ -59,6 +46,7 @@ MATCHES_SCHEMA = StructType([
     StructField("match_status", StringType(), True),
 ])
 
+# defining schema for player match statistics
 PLAYER_MATCH_STATS_SCHEMA = StructType([
     StructField("stat_id", StringType(), True),
     StructField("match_id", StringType(), True),
@@ -70,6 +58,7 @@ PLAYER_MATCH_STATS_SCHEMA = StructType([
     StructField("rounds_played", StringType(), True),
 ])
 
+# defining schema for match events
 MATCH_EVENTS_SCHEMA = StructType([
     StructField("event_id", StringType(), True),
     StructField("match_id", StringType(), True),
@@ -79,20 +68,8 @@ MATCH_EVENTS_SCHEMA = StructType([
 ])
 
 
-# ---------------------------------------------------------
-# 3. CREATE THE SPARK SESSION
-# ---------------------------------------------------------
-
-def create_spark_session() -> SparkSession:
-    """
-    Create and return the Spark session used by this project.
-
-    local[*] means Spark runs on this computer and can use
-    the available logical CPU cores.
-
-    getOrCreate() reuses an existing session when possible,
-    instead of unnecessarily creating another one.
-    """
+# creating spark session
+def create_spark_session():
 
     spark = (
         SparkSession.builder
@@ -101,61 +78,28 @@ def create_spark_session() -> SparkSession:
         .getOrCreate()
     )
 
-    # Show useful information while developing the pipeline.
+    # setting log level to show warnings and errors
     spark.sparkContext.setLogLevel("WARN")
 
+    # returning the spark session created
     return spark
 
 
-# ---------------------------------------------------------
-# 4. REUSABLE CSV READER
-# ---------------------------------------------------------
+# reading csv data using the provided schema
+# This is a common fxn to read all the csv files
+def read_csv(spark, file_path, schema, dataset_name):
 
-def read_csv(
-    spark: SparkSession,
-    file_path: Path,
-    schema: StructType,
-    dataset_name: str,
-) -> DataFrame:
-    """
-    Read one CSV file using its explicitly defined schema.
-
-    Parameters:
-        spark:
-            The active Spark session.
-
-        file_path:
-            Location of the CSV file.
-
-        schema:
-            Expected column names and data types.
-
-        dataset_name:
-            Friendly name used in messages.
-
-    Returns:
-        A Spark DataFrame containing the source records.
-
-    Important:
-        This function does not drop duplicates, replace
-        placeholders, or remove invalid business records.
-    """
-
-    # Give a clear error before Spark tries to read a
-    # file that does not exist.
+    # checking whether the csv file exists
     if not file_path.is_file():
+        # raising an exception if file doesnt exist
         raise FileNotFoundError(
             f"Cannot find {dataset_name} CSV file: {file_path}"
         )
 
+    # printing dataset  being read
     print(f"Reading {dataset_name}: {file_path}")
 
-    # Explicit schema prevents Spark from guessing column types.
-    # PERMISSIVE mode allows Spark to attempt to read malformed
-    # input instead of immediately failing the whole job.
-    #
-    # Placeholder strings are deliberately not configured as
-    # null values, so values like "unknown" remain visible.
+    # reading csv with an explicit schema
     df = (
         spark.read
         .format("csv")
@@ -169,13 +113,10 @@ def read_csv(
     return df
 
 
-# ---------------------------------------------------------
-# 5. INDIVIDUAL DATASET READERS
-# ---------------------------------------------------------
+# fxn for reading team details from teams.csv
+def read_teams(spark, data_dir=DEFAULT_DATA_DIR):
 
-def read_teams(spark: SparkSession, data_dir: Path = DEFAULT_DATA_DIR) -> DataFrame:
-    """Read team details from teams.csv."""
-
+    # calling the common read_csv fxn 
     return read_csv(
         spark=spark,
         file_path=data_dir / "teams.csv",
@@ -184,8 +125,8 @@ def read_teams(spark: SparkSession, data_dir: Path = DEFAULT_DATA_DIR) -> DataFr
     )
 
 
-def read_players(spark: SparkSession, data_dir: Path = DEFAULT_DATA_DIR) -> DataFrame:
-    """Read player details from players.csv."""
+# reading player details from players.csv
+def read_players(spark, data_dir=DEFAULT_DATA_DIR):
 
     return read_csv(
         spark=spark,
@@ -195,8 +136,8 @@ def read_players(spark: SparkSession, data_dir: Path = DEFAULT_DATA_DIR) -> Data
     )
 
 
-def read_matches(spark: SparkSession, data_dir: Path = DEFAULT_DATA_DIR) -> DataFrame:
-    """Read match details and raw scores from matches.csv."""
+# reading match details from matches.csv
+def read_matches(spark, data_dir=DEFAULT_DATA_DIR):
 
     return read_csv(
         spark=spark,
@@ -206,11 +147,8 @@ def read_matches(spark: SparkSession, data_dir: Path = DEFAULT_DATA_DIR) -> Data
     )
 
 
-def read_player_match_stats(
-    spark: SparkSession,
-    data_dir: Path = DEFAULT_DATA_DIR,
-) -> DataFrame:
-    """Read player statistics for individual matches."""
+# reading player statistics from player_match_stats.csv
+def read_player_match_stats(spark, data_dir=DEFAULT_DATA_DIR):
 
     return read_csv(
         spark=spark,
@@ -220,11 +158,8 @@ def read_player_match_stats(
     )
 
 
-def read_match_events(
-    spark: SparkSession,
-    data_dir: Path = DEFAULT_DATA_DIR,
-) -> DataFrame:
-    """Read events associated with tournament matches."""
+# reading match events from match_events.csv
+def read_match_events(spark, data_dir=DEFAULT_DATA_DIR):
 
     return read_csv(
         spark=spark,
@@ -234,20 +169,8 @@ def read_match_events(
     )
 
 
-# ---------------------------------------------------------
-# 6. LOAD ALL DATASETS
-# ---------------------------------------------------------
-
-def load_all_datasets(
-    spark: SparkSession,
-    data_dir: Path = DEFAULT_DATA_DIR,
-) -> dict[str, DataFrame]:
-    """
-    Load all five source datasets and return them in a dictionary.
-
-    The dictionary lets other modules access each DataFrame
-    by a clear name without repeating the reading logic.
-    """
+# loading all five datasets into a dictionary
+def load_all_datasets(spark, data_dir=DEFAULT_DATA_DIR):
 
     datasets = {
         "teams": read_teams(spark, data_dir),
@@ -257,6 +180,8 @@ def load_all_datasets(
         "match_events": read_match_events(spark, data_dir),
     }
 
+    # logging successful dataset loading
     print("\nAll five datasets have been loaded.")
 
+    #returning the dictionary of all the dataframes
     return datasets
