@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from datetime import datetime
 from contextlib import redirect_stdout
@@ -23,12 +24,11 @@ from analytics import (
 from sql_analytics import display_sql_analytics
 
 
+# ============================================================
+# PROJECT PATHS
+# ============================================================
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-
-# Define the directory where pipeline outputs will be stored.
-# All quality reports, cleaned datasets, quarantined records,
-# and analytics results will be written under this directory.
 OUTPUT_DIR = PROJECT_ROOT / "outputs"
 LOG_DIR = PROJECT_ROOT / "logs"
 
@@ -170,33 +170,49 @@ def log_existing_issue_summary(quality_issues: dict) -> None:
         )
 
 
+# ============================================================
+# HELPER: SAVE DATAFRAME AS PARQUET
+# ============================================================
 
-# fxn to save a dataframe as a parquet
-def save_parquet(df, output_name):
+def save_parquet(df, output_name: str) -> None:
+    """Save a DataFrame to the outputs directory as Parquet."""
 
-    # Combine the main output directory with the requested output name.
-    # For example, "analytics/team_performance" becomes a path
-    # inside the project's outputs directory.
     output_path = OUTPUT_DIR / output_name
 
-    (
-        df.write
-        .mode("overwrite")
-        .parquet(str(output_path))
-    )
+    logger.info("Saving Parquet output: %s", output_path)
 
-    print(f"Saved Parquet output: {output_path}")
+    try:
+        (
+            df.write
+            .mode("overwrite")
+            .parquet(str(output_path))
+        )
+
+        logger.info(
+            "Successfully saved Parquet output: %s",
+            output_path,
+        )
+
+    except Exception:
+        logger.exception(
+            "Failed to save Parquet output: %s",
+            output_path,
+        )
+        raise
 
 
-# START OF MAIN PIPELINE
-def main():
+# ============================================================
+# MAIN PIPELINE
+# ============================================================
 
 def main() -> None:
-    spark = create_spark_session()
+    spark = None
 
-    # Use try/finally to ensure Spark is stopped even if an error occurs
-    # during ingestion, transformation, validation, cleaning, or analytics.
     try:
+        logger.info("=" * 70)
+        logger.info("STARTING E-SPORT ANALYSIS PIPELINE")
+        logger.info("=" * 70)
+
         OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
         spark = create_spark_session()
@@ -205,101 +221,72 @@ def main() -> None:
         # ----------------------------------------------------
         # STEP 1: INGEST RAW CSV DATASETS
         # ----------------------------------------------------
-        print("\n" + "=" * 70)
-        print("STEP 1: INGESTION")
-        print("=" * 70)
+        logger.info("STEP 1: INGESTION")
 
-        # Read all configured source datasets into Spark DataFrames.
-        # The returned dictionary contains each dataset under its name.
-        # These are the raw inputs before the transformation and cleaning steps.
         raw_data = load_all_datasets(spark)
 
-        # Inspect every raw dataset before proceeding.
-        # name is the dataset name, and df is its corresponding DataFrame.
         for name, df in raw_data.items():
-            print(f"\nRaw dataset: {name}")
-            print(f"Row count: {df.count()}")
-            df.printSchema()
+            row_count = df.count()
+
+            logger.info(
+                "Raw dataset: %s | Rows: %s",
+                name,
+                row_count,
+            )
+
+            log_schema(df, f"Raw dataset '{name}'")
 
         # ----------------------------------------------------
         # STEP 2: TRANSFORM RAW DATA
         # ----------------------------------------------------
-        print("\n" + "=" * 70)
-        print("STEP 2: TRANSFORMATION")
-        print("=" * 70)
+        logger.info("STEP 2: TRANSFORMATION")
 
-        # Apply the transformations defined in transform.py.
-        # The raw_data dictionary is passed into the transformation function.
-        # The returned dictionary contains the transformed DataFrames.
-        # The exact transformations are controlled by transform_all_datasets().
         transformed_data = transform_all_datasets(raw_data)
 
-        # Report the number of rows in every transformed dataset.
-        # This helps us inspect the output of the transformation stage.
         for name, df in transformed_data.items():
-            print(f"{name}: {df.count()} transformed rows")
+            row_count = df.count()
 
+            logger.info(
+                "Transformed dataset: %s | Rows: %s",
+                name,
+                row_count,
+            )
 
-        # STEP 3: DATA QUALITY VALIDATION
-        # Validate before cleaning so source problems remain
-        # visible in the quality report.
+            log_schema(df, f"Transformed dataset '{name}'")
+
         # ----------------------------------------------------
-        print("\n" + "=" * 70)
-        print("STEP 3: DATA QUALITY VALIDATION")
-        print("=" * 70)
+        # STEP 3: DATA QUALITY VALIDATION
+        # ----------------------------------------------------
+        logger.info("STEP 3: DATA QUALITY VALIDATION")
 
-        # Run the configured data quality checks on the transformed datasets.
-        # The function returns a dictionary containing issue DataFrames.
-        # Each entry represents a particular validation issue or check.
-        #
-        # Validation happens before cleaning so that problems can be
-        # identified and reported before cleaning changes the data.
         quality_issues = validate_all_datasets(transformed_data)
 
-        show_issue_summary(quality_issues)
+        # Capture the summary produced by your existing function.
+        log_existing_issue_summary(quality_issues)
 
-        # Save individual validation issue DataFrames.
+        # Log a structured count for every quality check.
+        log_validation_summary(quality_issues)
+
+        # Save each quality issue DataFrame.
         for issue_name, issue_df in quality_issues.items():
-
-            # Save the issue DataFrame inside the quality_issues directory.
-            # Each issue receives its own output path.
             save_parquet(
                 issue_df,
                 f"quality_issues/{issue_name}",
             )
 
+        logger.info("Data quality validation completed")
+
         # ----------------------------------------------------
         # STEP 4: CLEANING AND QUARANTINE
-        # clean_all_datasets returns nested dictionaries:
-        #   cleaned_data["cleaned"]
-        #   cleaned_data["quarantined"]
         # ----------------------------------------------------
-        print("\n" + "=" * 70)
-        print("STEP 4: CLEANING AND QUARANTINE")
-        print("=" * 70)
+        logger.info("STEP 4: CLEANING AND QUARANTINE")
 
-        # Apply the cleaning rules defined in clean.py.
-        # The input is transformed_data, so cleaning operates on
-        # the transformed datasets rather than the original raw inputs.
-        #
-        # The function returns a dictionary containing two groups:
-        # cleaned datasets and quarantined records.
-        # The exact cleaning and quarantine rules are defined in clean.py.
         cleaning_result = clean_all_datasets(transformed_data)
 
-        # Extract the successfully cleaned DataFrames.
-        # These are the datasets used by the downstream analytics.
         cleaned = cleaning_result["cleaned"]
-
-        # Extract the quarantined DataFrames.
-        # These contain records separated by the cleaning process.
         quarantined = cleaning_result["quarantined"]
 
-        # Process every cleaned dataset.
         for name, df in cleaned.items():
-
-            # Count the records remaining in the cleaned DataFrame.
-            # This helps us inspect the size of each cleaned dataset.
             row_count = df.count()
 
             logger.info(
@@ -308,18 +295,12 @@ def main() -> None:
                 row_count,
             )
 
-            # Save each cleaned dataset to its own Parquet output directory.
-            # For example, the matches DataFrame is saved under cleaned/matches.
             save_parquet(
                 df,
                 f"cleaned/{name}",
             )
 
-        # Process every quarantined dataset.
         for name, df in quarantined.items():
-
-            # Count the records separated into quarantine.
-            # This helps us understand how many records were quarantined.
             row_count = df.count()
 
             if row_count > 0:
@@ -334,93 +315,56 @@ def main() -> None:
                     name,
                 )
 
-            # Save each quarantined DataFrame separately.
-            # Keeping quarantine outputs separate preserves access to
-            # records that were not retained in the cleaned datasets.
             save_parquet(
                 df,
                 f"quarantined/{name}",
             )
 
+        logger.info("Cleaning and quarantine completed")
+
         # ----------------------------------------------------
         # STEP 5: DATAFRAME ANALYTICS
         # ----------------------------------------------------
-        print("\n" + "=" * 70)
-        print("STEP 5: DATAFRAME ANALYTICS")
-        print("=" * 70)
+        logger.info("STEP 5: DATAFRAME ANALYTICS")
 
-        # Build team-level match records from the cleaned matches DataFrame.
-        # This function prepares a team-versus-opponent perspective
-        # for the team performance and team form calculations.
         team_match_records = build_team_match_records(
             cleaned["matches"]
         )
 
-        # Calculate team performance using the team-match records.
-        # The returned DataFrame contains the performance summary
-        # calculated by calculate_team_performance().
         team_performance = calculate_team_performance(
             team_match_records
         )
 
-        # Calculate player performance using three cleaned datasets:
-        # 1. player_match_stats contains player statistics for matches.
-        # 2. matches provides match details and completion status.
-        # 3. players provides player details such as names, teams, and roles.
-        #
-        # Passing these datasets allows the function to connect player
-        # statistics with the relevant match and player information.
         player_performance = calculate_player_performance(
             cleaned["player_match_stats"],
             cleaned["matches"],
             cleaned["players"],
         )
 
-        # Summarize event counts by game type and event type.
-        # The event data provides the events, while matches supplies
-        # the associated game information.
         events_by_game_type = summarize_events_by_game_type(
             cleaned["match_events"],
             cleaned["matches"],
         )
 
-        # Summarize event counts by month.
-        # The function uses event timestamps and match information
-        # according to the logic defined in analytics.py.
         events_by_month = summarize_events_by_month(
             cleaned["match_events"],
             cleaned["matches"],
         )
 
-        # Summarize event duration statistics.
-        # The function calculates the duration measures defined in analytics.py.
-        # Event duration is not the same as the total duration of a match.
         event_durations = summarize_event_durations(
             cleaned["match_events"],
             cleaned["matches"],
         )
 
-        # Summarize event exposure by team.
-        # This function associates events with teams involved in the matches
-        # and produces the team-level event summary.
         event_exposure_by_team = summarize_event_exposure_by_team(
             cleaned["match_events"],
             cleaned["matches"],
         )
 
-        # Calculate team form over time using the team-match records.
-        # The function applies the chronological and rolling calculations
-        # defined in analytics.py.
         team_form = calculate_team_form_over_time(
             team_match_records
         )
 
-        # Collect all DataFrame analytics results in one dictionary.
-        # Each key provides a descriptive name for the output.
-        # Each value is the corresponding result DataFrame.
-        
-        # Keeping the results together makes it easier to display and
-        # save all analytics using one loop instead of repeating code.
         dataframe_results = {
             "team_performance": team_performance,
             "player_performance": player_performance,
@@ -431,80 +375,115 @@ def main() -> None:
             "team_form_over_time": team_form,
         }
 
-        # Loop through every analytics result.
-        # name is the output name, and df is the result DataFrame.
         for name, df in dataframe_results.items():
-            print(f"\n{'=' * 70}")
-            print(name.replace("_", " ").upper())
-            print("=" * 70)
-            df.show(30, truncate=False)
+            logger.info(
+                "DATAFRAME ANALYTICS RESULT: %s",
+                name,
+            )
 
-            # Save this analytics result to its own Parquet output path.
-            # For example, team_performance is saved under analytics/team_performance.
+            log_schema(df, f"Analytics result '{name}'")
+            log_dataframe(
+                df,
+                label=f"Analytics result '{name}'",
+                n=20,
+                truncate=False,
+            )
+
+            row_count = df.count()
+
+            logger.info(
+                "Analytics result '%s' | Total rows: %s",
+                name,
+                row_count,
+            )
+
             save_parquet(
                 df,
                 f"analytics/{name}",
             )
 
+        logger.info("DataFrame analytics completed")
+
         # ----------------------------------------------------
         # STEP 6: SPARK SQL ANALYTICS
         # ----------------------------------------------------
-        print("\n" + "=" * 70)
-        print("STEP 6: SPARK SQL ANALYTICS")
-        print("=" * 70)
+        logger.info("STEP 6: SPARK SQL ANALYTICS")
 
-        # Run and display the SQL analyses using the Spark session
-        # and the cleaned datasets.
-        #
-        # Inside display_sql_analytics(), the SQL views are registered,
-        # the SQL queries are executed, their results are displayed,
-        # and the match outcome counts are checked against DataFrame results.
-        #
-        # If the validation fails, the function raises an AssertionError.
-        # Otherwise, it returns the SQL result DataFrames in a dictionary.
         sql_results = display_sql_analytics(
             spark,
             cleaned,
         )
 
-        # Save every SQL analytics result to Parquet.
-        # Each result is stored separately under sql_analytics.
         for name, df in sql_results.items():
+            logger.info(
+                "SPARK SQL ANALYTICS RESULT: %s",
+                name,
+            )
+
+            log_schema(df, f"SQL analytics result '{name}'")
+            log_dataframe(
+                df,
+                label=f"SQL analytics result '{name}'",
+                n=20,
+                truncate=False,
+            )
+
+            row_count = df.count()
+
+            logger.info(
+                "SQL analytics result '%s' | Total rows: %s",
+                name,
+                row_count,
+            )
+
             save_parquet(
                 df,
                 f"sql_analytics/{name}",
             )
 
+        logger.info("Spark SQL analytics completed")
+
         # ----------------------------------------------------
         # STEP 7: READ BACK A PARQUET OUTPUT
         # ----------------------------------------------------
-        print("\n" + "=" * 70)
-        print("STEP 7: PARQUET READ-BACK CHECK")
-        print("=" * 70)
+        logger.info("STEP 7: PARQUET READ-BACK CHECK")
 
-        player_output_path = OUTPUT_DIR / "analytics/player_performance"
+        player_output_path = (
+            OUTPUT_DIR / "analytics/player_performance"
+        )
 
-        # Read the saved Parquet output back into a new Spark DataFrame.
-        # This checks that Spark can access the saved output.
         player_parquet = spark.read.parquet(
             str(player_output_path)
         )
 
-        print("Player performance Parquet schema:")
-        player_parquet.printSchema()
-
-        print(
-            "Rows in saved player performance output:",
-            player_parquet.count(),
+        log_schema(
+            player_parquet,
+            "Player performance Parquet read-back",
         )
 
-        player_parquet.show(10, truncate=False)
+        row_count = player_parquet.count()
 
-        print("\nPipeline completed successfully.")
+        logger.info(
+            "Rows in saved player performance output: %s",
+            row_count,
+        )
 
-    # Always stop Spark when execution leaves the try block,
-    # whether the pipeline finishes successfully or an exception occurs.
-    # This releases Spark resources and shuts down the Spark session.
+        log_dataframe(
+            player_parquet,
+            label="Player performance Parquet read-back",
+            n=10,
+            truncate=False,
+        )
+
+        logger.info("=" * 70)
+        logger.info("PIPELINE COMPLETED SUCCESSFULLY")
+        logger.info("Log file: %s", LOG_FILE)
+        logger.info("=" * 70)
+
+    except Exception:
+        logger.exception("PIPELINE FAILED")
+        raise
+
     finally:
         if spark is not None:
             logger.info("Stopping Spark session")
