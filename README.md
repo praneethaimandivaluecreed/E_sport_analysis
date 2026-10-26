@@ -11,7 +11,7 @@ The pipeline covers ingestion, transformation, validation, cleaning, quarantine,
 
 - Python and PySpark
 - Spark SQL
-- CSV and Apache Parquet
+- Apache Parquet
 - Pytest
 
 ## 3. Project Structure
@@ -87,12 +87,96 @@ Player-match statistics account for 133 of the 140 quarantined records, making t
 
 ### 6.2 Quality Checks Performed
 
-- **Missing and blank values:** Required identifiers and fields are checked for null or blank values. Text values are trimmed, and blank strings are converted to null where applicable.
-- **Duplicate records:** Duplicate records, identifiers and player-match combinations are identified and handled according to the implemented dataset-specific cleaning rules.
-- **Reference integrity:** Player team IDs and match team IDs are validated against the cleaned teams reference data. Player statistics are checked against valid match references.
-- **Match validation:** Matches are checked for missing identifiers, identical team references, and completed-match status where required by the relevant analytics.
-- **Type and value validation:** Match timestamps and numeric scores are parsed into appropriate types. Player statistics are converted to integers, with negative or otherwise invalid metrics excluded from relevant calculations.
-- **Event validation:** Event fields and duration values are checked before event-level analytics are calculated.
+
+## Data Quality Checks
+
+### 1. Data Standardization and Transformation
+
+- **Whitespace trimming:** Removes leading and trailing whitespace from all columns.
+- **Blank-value standardization:** Converts empty and whitespace-only strings to `NULL`.
+- **Category standardization:** Converts player roles, player statuses, match statuses, game names, and event types to lowercase.
+- **Date parsing:** Converts player join dates into date values.
+- **Timestamp parsing:** Parses match and event timestamps into timestamp values.
+- **Numeric type conversion:** Uses `try_cast` to convert match scores, player statistics, and event durations into integer columns.
+- **Invalid conversion handling:** Failed date, timestamp, or numeric conversions produce `NULL` in the parsed or converted columns.
+- **Raw-value preservation:** Retains original columns alongside parsed or converted columns for investigation.
+
+### 2. Dataset-Level Validation
+
+#### Teams
+
+- Detects duplicate `team_id` values.
+- Identifies missing or blank `team_id` values.
+- Identifies missing or blank `team_name` values.
+
+#### Players
+
+- Detects duplicate `player_id` values.
+- Identifies missing or blank `player_id` values.
+- Identifies missing or blank `player_name` values.
+- Identifies missing player roles.
+- Detects invalid player join dates.
+- Checks for references to unknown teams.
+
+#### Matches
+
+- Detects duplicate `match_id` values.
+- Identifies missing or blank `match_id`, `team_a_id`, `team_b_id`, and game values.
+- Detects invalid match timestamps.
+- Detects invalid numeric conversions for team scores.
+- Identifies negative team scores.
+- Detects matches where both participating team IDs are identical.
+- Checks for references to unknown teams.
+
+#### Player-Match Statistics
+
+- Detects duplicate `stat_id` values.
+- Detects duplicate `(match_id, player_id)` combinations.
+- Identifies missing or blank `stat_id`, `match_id`, and `player_id` values.
+- Detects invalid numeric conversions for `kills`, `deaths`, `assists`, `damage`, and `rounds_played`.
+- Identifies negative values in these five statistical fields.
+- Checks for references to unknown players and matches.
+- Identifies statistics associated with players whose team references are unknown.
+
+#### Match Events
+
+- Detects duplicate `event_id` values.
+- Identifies missing or blank `event_id` and `match_id` values.
+- Detects invalid event timestamps.
+- Detects invalid numeric conversions for event durations.
+- Identifies negative event durations.
+- Checks for references to unknown matches.
+
+### 3. Cross-File Referential Integrity
+
+- **Players → Teams:** Checks whether each player's team reference exists.
+- **Matches → Teams:** Checks whether both participating team references exist.
+- **Player Statistics → Players:** Checks whether referenced players exist.
+- **Player Statistics → Matches:** Checks whether referenced matches exist.
+- **Player Statistics → Team Assignments:** Checks for statistics associated with players whose team references are unknown.
+- **Match Events → Matches:** Checks whether each event references an existing match.
+
+Left anti joins are used to identify unmatched references across related datasets.
+
+### 4. Data Cleaning and Quarantine
+
+- **Missing required fields:** Quarantines records with missing or blank identifiers and other required fields covered by the cleaning rules.
+- **Exact duplicate removal:** Retains one copy of an exact duplicate record and quarantines excess identical copies.
+- **Duplicate player-match combinations:** Quarantines all records belonging to duplicated `(match_id, player_id)` groups.
+- **Unknown references:** Quarantines records that reference unknown teams, players, or matches, according to the implemented cleaning rules.
+- **Rejected parent references:** Distinguishes references to records rejected during upstream cleaning from references to IDs that are entirely unknown.
+- **Invalid match relationships:** Quarantines matches where both participating team IDs are identical.
+- **Quarantine reasons:** Adds a reason to quarantined records to support investigation and traceability.
+- **Dependency-aware cleaning:** Processes datasets in the order Teams → Players → Matches → Player Statistics → Match Events, allowing downstream checks to use cleaned parent datasets.
+
+### 5. Validation and Quarantine Scope
+
+Validation findings and quarantine rules are not identical. The validation functions detect issues, while the cleaning functions quarantine records only when an explicit cleaning rule is implemented.
+
+- Invalid timestamps, unparseable numeric values, and negative scores, statistics, or durations are detected by validation but are not explicitly quarantined by the cleaning functions shown.
+- Duplicate-key validation does not mean every record with a duplicated key is automatically quarantined. General duplicate removal handles exact duplicate rows, while duplicate player-match combinations have a separate quarantine rule.
+- Missing `event_type` is handled by event cleaning, although the supplied event validation function does not explicitly check it.
+
 
 ### 6.3 Quarantine Summary
 
@@ -106,12 +190,6 @@ A total of **140 records were quarantined** across four datasets:
 Teams had no quarantined records.
 
 Quarantined records are preserved with a `quarantine_reason`. Quality-issue outputs record validation findings, while quarantine outputs preserve records rejected by the cleaning rules.
-
-The supplied run log confirms dataset-level quarantine counts but does not provide a breakdown by individual rejection reason. Exact reason-level counts should be reported only after inspecting the generated quarantine or quality-report outputs.
-
-Quality-issue categories may overlap, so their counts should not automatically be summed as unique affected records.
-
-The row-count reconciliation confirms that the input rows are accounted for, but does not by itself prove that every record was classified correctly.
 
 ## 7. Analytics and Window Functions
 
@@ -240,12 +318,6 @@ Parquet is suitable for these outputs because the pipeline produces structured a
 - **Compression:** Columnar encoding and compression can reduce storage requirements.
 - **Reusable outputs:** Downstream analytics can read cleaned and aggregated datasets without repeatedly parsing the original CSV files.
 
-Parquet does not guarantee correct results or automatically eliminate expensive joins and shuffles. Actual performance depends on query patterns, data layout and execution plans.
-
-Spark generally writes Parquet datasets as directories containing one or more `part-*.parquet` files.
-
-The pipeline uses overwrite mode, so rerunning it replaces existing data at the relevant output destinations.
-
 ## 13. Logging and Reliability
 
 The pipeline uses logging and staged processing to make execution easier to monitor and troubleshoot.
@@ -267,13 +339,6 @@ Run from the project root:
 ```bash
 python src/main.py
 ```
-
-To run the tests, when the dependencies are installed:
-
-```bash
-pytest
-```
-
 The pipeline expects the source CSV files under `data/` and writes logs and outputs within the project directory.
 
 ## 15. Assumptions and Limitations
@@ -289,4 +354,3 @@ The pipeline expects the source CSV files under `data/` and writes logs and outp
 - The supplied execution-plan output shows `isFinalPlan=false`; therefore, it is not evidence of the final AQE-adapted plan.
 - The run log does not provide individual quarantine-reason counts or prove every metric independently.
 
-Before final submission, inspect individual quality-issue counts, quarantine reasons, actual execution plans, test results and analytical values. Document business findings only when supported by the generated outputs.
