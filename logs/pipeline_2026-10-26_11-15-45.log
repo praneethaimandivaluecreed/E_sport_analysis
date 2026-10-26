@@ -1,0 +1,409 @@
+2026-10-26 11:15:45,340 | INFO | __main__ | Logging initialized
+2026-10-26 11:15:45,341 | INFO | __main__ | Log file: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\logs\pipeline_2026-10-26_11-15-45.log
+2026-10-26 11:15:45,342 | INFO | __main__ | ======================================================================
+2026-10-26 11:15:45,342 | INFO | __main__ | STARTING E-SPORT ANALYSIS PIPELINE
+2026-10-26 11:15:45,343 | INFO | __main__ | ======================================================================
+2026-10-26 11:15:59,770 | INFO | __main__ | Spark session created successfully
+2026-10-26 11:15:59,772 | INFO | __main__ | STEP 1: INGESTION
+2026-10-26 11:16:02,360 | INFO | __main__ | Raw dataset: teams | Rows: 8
+2026-10-26 11:16:02,368 | INFO | __main__ | Raw dataset 'teams' schema:
+root
+ |-- team_id: string (nullable = true)
+ |-- team_name: string (nullable = true)
+ |-- region: string (nullable = true)
+ |-- coach: string (nullable = true)
+
+2026-10-26 11:16:02,512 | INFO | __main__ | Raw dataset: players | Rows: 80
+2026-10-26 11:16:02,513 | INFO | __main__ | Raw dataset 'players' schema:
+root
+ |-- player_id: string (nullable = true)
+ |-- player_name: string (nullable = true)
+ |-- team_id: string (nullable = true)
+ |-- role: string (nullable = true)
+ |-- join_date: string (nullable = true)
+ |-- status: string (nullable = true)
+
+2026-10-26 11:16:02,641 | INFO | __main__ | Raw dataset: matches | Rows: 402
+2026-10-26 11:16:02,642 | INFO | __main__ | Raw dataset 'matches' schema:
+root
+ |-- match_id: string (nullable = true)
+ |-- match_time: string (nullable = true)
+ |-- game: string (nullable = true)
+ |-- team_a_id: string (nullable = true)
+ |-- team_b_id: string (nullable = true)
+ |-- team_a_score: string (nullable = true)
+ |-- team_b_score: string (nullable = true)
+ |-- match_status: string (nullable = true)
+
+2026-10-26 11:16:02,762 | INFO | __main__ | Raw dataset: player_match_stats | Rows: 1803
+2026-10-26 11:16:02,763 | INFO | __main__ | Raw dataset 'player_match_stats' schema:
+root
+ |-- stat_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- player_id: string (nullable = true)
+ |-- kills: string (nullable = true)
+ |-- deaths: string (nullable = true)
+ |-- assists: string (nullable = true)
+ |-- damage: string (nullable = true)
+ |-- rounds_played: string (nullable = true)
+
+2026-10-26 11:16:03,017 | INFO | __main__ | Raw dataset: match_events | Rows: 1000
+2026-10-26 11:16:03,018 | INFO | __main__ | Raw dataset 'match_events' schema:
+root
+ |-- event_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- event_time: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- duration_seconds: string (nullable = true)
+
+2026-10-26 11:16:03,019 | INFO | __main__ | STEP 2: TRANSFORMATION
+2026-10-26 11:16:04,014 | INFO | __main__ | Transformed dataset: teams | Rows: 8
+2026-10-26 11:16:04,015 | INFO | __main__ | Transformed dataset 'teams' schema:
+root
+ |-- team_id: string (nullable = true)
+ |-- team_name: string (nullable = true)
+ |-- region: string (nullable = true)
+ |-- coach: string (nullable = true)
+
+2026-10-26 11:16:04,131 | INFO | __main__ | Transformed dataset: players | Rows: 80
+2026-10-26 11:16:04,135 | INFO | __main__ | Transformed dataset 'players' schema:
+root
+ |-- player_id: string (nullable = true)
+ |-- player_name: string (nullable = true)
+ |-- team_id: string (nullable = true)
+ |-- role: string (nullable = true)
+ |-- join_date: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- parsed_join_date: date (nullable = true)
+
+2026-10-26 11:16:04,274 | INFO | __main__ | Transformed dataset: matches | Rows: 402
+2026-10-26 11:16:04,275 | INFO | __main__ | Transformed dataset 'matches' schema:
+root
+ |-- match_id: string (nullable = true)
+ |-- match_time: string (nullable = true)
+ |-- game: string (nullable = true)
+ |-- team_a_id: string (nullable = true)
+ |-- team_b_id: string (nullable = true)
+ |-- team_a_score: string (nullable = true)
+ |-- team_b_score: string (nullable = true)
+ |-- status: string (nullable = true)
+ |-- parsed_match_time: timestamp (nullable = true)
+ |-- team_a_score_int: integer (nullable = true)
+ |-- team_b_score_int: integer (nullable = true)
+
+2026-10-26 11:16:04,384 | INFO | __main__ | Transformed dataset: player_match_stats | Rows: 1803
+2026-10-26 11:16:04,385 | INFO | __main__ | Transformed dataset 'player_match_stats' schema:
+root
+ |-- stat_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- player_id: string (nullable = true)
+ |-- kills: string (nullable = true)
+ |-- deaths: string (nullable = true)
+ |-- assists: string (nullable = true)
+ |-- damage: string (nullable = true)
+ |-- rounds_played: string (nullable = true)
+ |-- kills_int: integer (nullable = true)
+ |-- deaths_int: integer (nullable = true)
+ |-- assists_int: integer (nullable = true)
+ |-- damage_int: integer (nullable = true)
+ |-- rounds_played_int: integer (nullable = true)
+
+2026-10-26 11:16:04,628 | INFO | __main__ | Transformed dataset: match_events | Rows: 1000
+2026-10-26 11:16:04,629 | INFO | __main__ | Transformed dataset 'match_events' schema:
+root
+ |-- event_id: string (nullable = true)
+ |-- match_id: string (nullable = true)
+ |-- event_time: string (nullable = true)
+ |-- event_type: string (nullable = true)
+ |-- duration_seconds: string (nullable = true)
+ |-- parsed_event_time: timestamp (nullable = true)
+ |-- duration_seconds_int: integer (nullable = true)
+
+2026-10-26 11:16:04,629 | INFO | __main__ | STEP 3: DATA QUALITY VALIDATION
+2026-10-26 11:16:14,458 | INFO | __main__ | Validation summary output:
+
+VALIDATION SUMMARY
+duplicate_team_ids: 0 issue rows
+missing_team_values: 0 issue rows
+duplicate_player_ids: 0 issue rows
+missing_player_values: 0 issue rows
+missing_player_roles: 1 issue rows
+invalid_player_join_dates: 0 issue rows
+duplicate_match_ids: 4 issue rows
+missing_match_values: 0 issue rows
+invalid_match_times: 1 issue rows
+invalid_team_a_scores: 10 issue rows
+invalid_team_b_scores: 7 issue rows
+same_team_in_match: 1 issue rows
+negative_team_a_scores: 0 issue rows
+negative_team_b_scores: 0 issue rows
+duplicate_stat_ids: 6 issue rows
+duplicate_player_match_stats: 111 issue rows
+missing_stats_keys: 0 issue rows
+invalid_kills: 29 issue rows
+invalid_deaths: 38 issue rows
+invalid_assists: 51 issue rows
+invalid_damage: 25 issue rows
+invalid_rounds_played: 304 issue rows
+negative_kills: 1 issue rows
+negative_deaths_int: 0 issue rows
+negative_assists_int: 0 issue rows
+negative_damage_int: 0 issue rows
+negative_rounds_played_int: 0 issue rows
+duplicate_event_ids: 0 issue rows
+missing_event_keys: 0 issue rows
+invalid_event_timestamps: 1 issue rows
+invalid_event_durations: 24 issue rows
+negative_event_durations: 0 issue rows
+players_unknown_teams: 1 issue rows
+matches_unknown_team_a: 0 issue rows
+matches_unknown_team_b: 0 issue rows
+stats_unknown_players: 1 issue rows
+stats_players_with_unknown_teams: 23 issue rows
+stats_unknown_matches: 0 issue rows
+events_unknown_matches: 1 issue rows
+2026-10-26 11:16:14,458 | INFO | __main__ | ============================================================
+2026-10-26 11:16:14,458 | INFO | __main__ | DATA QUALITY ISSUE SUMMARY
+2026-10-26 11:16:14,459 | INFO | __main__ | ============================================================
+2026-10-26 11:16:14,614 | INFO | __main__ | Quality check 'duplicate_team_ids': no flagged rows
+2026-10-26 11:16:14,667 | INFO | __main__ | Quality check 'missing_team_values': no flagged rows
+2026-10-26 11:16:14,869 | INFO | __main__ | Quality check 'duplicate_player_ids': no flagged rows
+2026-10-26 11:16:14,933 | INFO | __main__ | Quality check 'missing_player_values': no flagged rows
+2026-10-26 11:16:14,996 | WARNING | __main__ | Quality check 'missing_player_roles': 1 flagged rows
+2026-10-26 11:16:15,071 | INFO | __main__ | Quality check 'invalid_player_join_dates': no flagged rows
+2026-10-26 11:16:15,651 | WARNING | __main__ | Quality check 'duplicate_match_ids': 4 flagged rows
+2026-10-26 11:16:15,710 | INFO | __main__ | Quality check 'missing_match_values': no flagged rows
+2026-10-26 11:16:15,766 | WARNING | __main__ | Quality check 'invalid_match_times': 1 flagged rows
+2026-10-26 11:16:15,835 | WARNING | __main__ | Quality check 'invalid_team_a_scores': 10 flagged rows
+2026-10-26 11:16:15,895 | WARNING | __main__ | Quality check 'invalid_team_b_scores': 7 flagged rows
+2026-10-26 11:16:15,949 | WARNING | __main__ | Quality check 'same_team_in_match': 1 flagged rows
+2026-10-26 11:16:15,999 | INFO | __main__ | Quality check 'negative_team_a_scores': no flagged rows
+2026-10-26 11:16:16,058 | INFO | __main__ | Quality check 'negative_team_b_scores': no flagged rows
+2026-10-26 11:16:16,351 | WARNING | __main__ | Quality check 'duplicate_stat_ids': 6 flagged rows
+2026-10-26 11:16:16,861 | WARNING | __main__ | Quality check 'duplicate_player_match_stats': 111 flagged rows
+2026-10-26 11:16:16,928 | INFO | __main__ | Quality check 'missing_stats_keys': no flagged rows
+2026-10-26 11:16:16,997 | WARNING | __main__ | Quality check 'invalid_kills': 29 flagged rows
+2026-10-26 11:16:17,061 | WARNING | __main__ | Quality check 'invalid_deaths': 38 flagged rows
+2026-10-26 11:16:17,138 | WARNING | __main__ | Quality check 'invalid_assists': 51 flagged rows
+2026-10-26 11:16:17,200 | WARNING | __main__ | Quality check 'invalid_damage': 25 flagged rows
+2026-10-26 11:16:17,263 | WARNING | __main__ | Quality check 'invalid_rounds_played': 304 flagged rows
+2026-10-26 11:16:17,326 | WARNING | __main__ | Quality check 'negative_kills': 1 flagged rows
+2026-10-26 11:16:17,401 | INFO | __main__ | Quality check 'negative_deaths_int': no flagged rows
+2026-10-26 11:16:17,467 | INFO | __main__ | Quality check 'negative_assists_int': no flagged rows
+2026-10-26 11:16:17,537 | INFO | __main__ | Quality check 'negative_damage_int': no flagged rows
+2026-10-26 11:16:17,633 | INFO | __main__ | Quality check 'negative_rounds_played_int': no flagged rows
+2026-10-26 11:16:18,250 | INFO | __main__ | Quality check 'duplicate_event_ids': no flagged rows
+2026-10-26 11:16:18,313 | INFO | __main__ | Quality check 'missing_event_keys': no flagged rows
+2026-10-26 11:16:18,366 | WARNING | __main__ | Quality check 'invalid_event_timestamps': 1 flagged rows
+2026-10-26 11:16:18,431 | WARNING | __main__ | Quality check 'invalid_event_durations': 24 flagged rows
+2026-10-26 11:16:18,494 | INFO | __main__ | Quality check 'negative_event_durations': no flagged rows
+2026-10-26 11:16:18,646 | WARNING | __main__ | Quality check 'players_unknown_teams': 1 flagged rows
+2026-10-26 11:16:18,792 | INFO | __main__ | Quality check 'matches_unknown_team_a': no flagged rows
+2026-10-26 11:16:18,943 | INFO | __main__ | Quality check 'matches_unknown_team_b': no flagged rows
+2026-10-26 11:16:19,128 | WARNING | __main__ | Quality check 'stats_unknown_players': 1 flagged rows
+2026-10-26 11:16:19,384 | WARNING | __main__ | Quality check 'stats_players_with_unknown_teams': 23 flagged rows
+2026-10-26 11:16:19,685 | INFO | __main__ | Quality check 'stats_unknown_matches': no flagged rows
+2026-10-26 11:16:19,939 | WARNING | __main__ | Quality check 'events_unknown_matches': 1 flagged rows
+2026-10-26 11:16:19,939 | INFO | __main__ | Sum of flagged rows across quality checks: 640
+2026-10-26 11:16:19,939 | INFO | __main__ | Note: this is a sum across checks; a record may be flagged by more than one check.
+2026-10-26 11:16:19,940 | INFO | __main__ | Saving Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_team_ids
+2026-10-26 11:16:21,261 | ERROR | __main__ | Failed to save Parquet output: C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\outputs\quality_issues\duplicate_team_ids
+Traceback (most recent call last):
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\src\main.py", line 188, in save_parquet
+    .parquet(str(output_path))
+     ~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\pyspark\sql\readwriter.py", line 2093, in parquet
+    self._jwrite.parquet(path)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\py4j\java_gateway.py", line 1362, in __call__
+    return_value = get_return_value(
+        answer, self.gateway_client, self.target_id, self.name)
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\pyspark\errors\exceptions\captured.py", line 251, in deco
+    return f(*a, **kw)
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\py4j\protocol.py", line 327, in get_return_value
+    raise Py4JJavaError(
+        "An error occurred while calling {0}{1}{2}.\n".
+        format(target_id, ".", name), value)
+py4j.protocol.Py4JJavaError: An error occurred while calling o1478.parquet.
+: java.util.concurrent.ExecutionException: Boxed Exception
+	at scala.concurrent.impl.Promise$.scala$concurrent$impl$Promise$$resolve(Promise.scala:99)
+	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:288)
+	at scala.concurrent.Promise.complete(Promise.scala:57)
+	at scala.concurrent.Promise.complete$(Promise.scala:56)
+	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:104)
+	at scala.concurrent.Promise.failure(Promise.scala:109)
+	at scala.concurrent.Promise.failure$(Promise.scala:109)
+	at scala.concurrent.impl.Promise$DefaultPromise.failure(Promise.scala:104)
+	at org.apache.spark.sql.execution.adaptive.ResultQueryStageExec.$anonfun$doMaterialize$2(QueryStageExec.scala:336)
+	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:863)
+	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:841)
+	at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:510)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1773)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at org.apache.spark.util.Utils$.getTryWithCallerStacktrace(Utils.scala:1457)
+	at org.apache.spark.util.LazyTry.get(LazyTry.scala:61)
+	at org.apache.spark.sql.execution.QueryExecution.$anonfun$commandExecuted$1(QueryExecution.scala:224)
+	at org.apache.spark.sql.execution.QueryExecution.withAbortTransactionOnFailure(QueryExecution.scala:632)
+	at org.apache.spark.sql.execution.QueryExecution.commandExecuted(QueryExecution.scala:224)
+	at org.apache.spark.sql.execution.QueryExecution.assertCommandExecuted(QueryExecution.scala:309)
+	at org.apache.spark.sql.classic.DataFrameWriter.runCommand(DataFrameWriter.scala:615)
+	at org.apache.spark.sql.classic.DataFrameWriter.save(DataFrameWriter.scala:115)
+	at org.apache.spark.sql.DataFrameWriter.parquet(DataFrameWriter.scala:381)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+	at py4j.Gateway.invoke(Gateway.java:282)
+	at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+	at py4j.commands.CallCommand.execute(CallCommand.java:79)
+	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:184)
+	at py4j.ClientServerConnection.run(ClientServerConnection.java:108)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: java.lang.UnsatisfiedLinkError: 'boolean org.apache.hadoop.io.nativeio.NativeIO$Windows.access0(java.lang.String, int)'
+	at org.apache.hadoop.io.nativeio.NativeIO$Windows.access0(Native Method)
+	at org.apache.hadoop.io.nativeio.NativeIO$Windows.access(NativeIO.java:817)
+	at org.apache.hadoop.fs.FileUtil.canRead(FileUtil.java:1415)
+	at org.apache.hadoop.fs.FileUtil.list(FileUtil.java:1620)
+	at org.apache.hadoop.fs.RawLocalFileSystem.listStatus(RawLocalFileSystem.java:802)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2079)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2123)
+	at org.apache.hadoop.fs.ChecksumFileSystem.listStatus(ChecksumFileSystem.java:1020)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2079)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2123)
+	at org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter.getAllCommittedTaskPaths(FileOutputCommitter.java:339)
+	at org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter.commitJobInternal(FileOutputCommitter.java:409)
+	at org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter.commitJob(FileOutputCommitter.java:382)
+	at org.apache.parquet.hadoop.ParquetOutputCommitter.commitJob(ParquetOutputCommitter.java:46)
+	at org.apache.spark.internal.io.HadoopMapReduceCommitProtocol.commitJob(HadoopMapReduceCommitProtocol.scala:184)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.$anonfun$writeAndCommit$3(FileFormatWriter.scala:289)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.scala:18)
+	at org.apache.spark.util.Utils$.timeTakenMs(Utils.scala:496)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.writeAndCommit(FileFormatWriter.scala:289)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeWrite(FileFormatWriter.scala:315)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.write(FileFormatWriter.scala:201)
+	at org.apache.spark.sql.execution.datasources.InsertIntoHadoopFsRelationCommand.run(InsertIntoHadoopFsRelationCommand.scala:195)
+	at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult$lzycompute(commands.scala:117)
+	at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult(commands.scala:115)
+	at org.apache.spark.sql.execution.command.DataWritingCommandExec.executeCollect(commands.scala:129)
+	at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.$anonfun$executeCollect$1(AdaptiveSparkPlanExec.scala:408)
+	at org.apache.spark.sql.execution.adaptive.ResultQueryStageExec.$anonfun$doMaterialize$1(QueryStageExec.scala:328)
+	at org.apache.spark.sql.execution.SQLExecutionThreadLocalCaptured.$anonfun$runWith$2(SQLExecution.scala:63)
+	at org.apache.spark.sql.execution.SQLExecution$.withSessionTagsApplied(SQLExecution.scala:352)
+	at org.apache.spark.sql.execution.SQLExecutionThreadLocalCaptured.$anonfun$runWith$1(SQLExecution.scala:61)
+	at org.apache.spark.JobArtifactSet$.withActiveJobArtifactState(JobArtifactSet.scala:94)
+	at org.apache.spark.sql.execution.SQLExecutionThreadLocalCaptured.runWith(SQLExecution.scala:57)
+	at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withThreadLocalCaptured$1(SQLExecution.scala:401)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	... 1 more
+
+2026-10-26 11:16:21,420 | ERROR | __main__ | PIPELINE FAILED
+Traceback (most recent call last):
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\src\main.py", line 272, in main
+    save_parquet(
+    ~~~~~~~~~~~~^
+        issue_df,
+        ^^^^^^^^^
+        f"quality_issues/{issue_name}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\E_sport_analysis\src\main.py", line 188, in save_parquet
+    .parquet(str(output_path))
+     ~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\pyspark\sql\readwriter.py", line 2093, in parquet
+    self._jwrite.parquet(path)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\py4j\java_gateway.py", line 1362, in __call__
+    return_value = get_return_value(
+        answer, self.gateway_client, self.target_id, self.name)
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\pyspark\errors\exceptions\captured.py", line 251, in deco
+    return f(*a, **kw)
+  File "C:\Users\VC_User6.DESKTOP-22FFUC4\Desktop\DATA ANALYTICS\ASSESMENT\SPACE_DATA_PIPELINE\.venv\Lib\site-packages\py4j\protocol.py", line 327, in get_return_value
+    raise Py4JJavaError(
+        "An error occurred while calling {0}{1}{2}.\n".
+        format(target_id, ".", name), value)
+py4j.protocol.Py4JJavaError: An error occurred while calling o1478.parquet.
+: java.util.concurrent.ExecutionException: Boxed Exception
+	at scala.concurrent.impl.Promise$.scala$concurrent$impl$Promise$$resolve(Promise.scala:99)
+	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete(Promise.scala:288)
+	at scala.concurrent.Promise.complete(Promise.scala:57)
+	at scala.concurrent.Promise.complete$(Promise.scala:56)
+	at scala.concurrent.impl.Promise$DefaultPromise.complete(Promise.scala:104)
+	at scala.concurrent.Promise.failure(Promise.scala:109)
+	at scala.concurrent.Promise.failure$(Promise.scala:109)
+	at scala.concurrent.impl.Promise$DefaultPromise.failure(Promise.scala:104)
+	at org.apache.spark.sql.execution.adaptive.ResultQueryStageExec.$anonfun$doMaterialize$2(QueryStageExec.scala:336)
+	at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(CompletableFuture.java:863)
+	at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(CompletableFuture.java:841)
+	at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:510)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1773)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at org.apache.spark.util.Utils$.getTryWithCallerStacktrace(Utils.scala:1457)
+	at org.apache.spark.util.LazyTry.get(LazyTry.scala:61)
+	at org.apache.spark.sql.execution.QueryExecution.$anonfun$commandExecuted$1(QueryExecution.scala:224)
+	at org.apache.spark.sql.execution.QueryExecution.withAbortTransactionOnFailure(QueryExecution.scala:632)
+	at org.apache.spark.sql.execution.QueryExecution.commandExecuted(QueryExecution.scala:224)
+	at org.apache.spark.sql.execution.QueryExecution.assertCommandExecuted(QueryExecution.scala:309)
+	at org.apache.spark.sql.classic.DataFrameWriter.runCommand(DataFrameWriter.scala:615)
+	at org.apache.spark.sql.classic.DataFrameWriter.save(DataFrameWriter.scala:115)
+	at org.apache.spark.sql.DataFrameWriter.parquet(DataFrameWriter.scala:381)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568)
+	at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+	at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+	at py4j.Gateway.invoke(Gateway.java:282)
+	at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+	at py4j.commands.CallCommand.execute(CallCommand.java:79)
+	at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:184)
+	at py4j.ClientServerConnection.run(ClientServerConnection.java:108)
+	at java.base/java.lang.Thread.run(Thread.java:842)
+Caused by: java.lang.UnsatisfiedLinkError: 'boolean org.apache.hadoop.io.nativeio.NativeIO$Windows.access0(java.lang.String, int)'
+	at org.apache.hadoop.io.nativeio.NativeIO$Windows.access0(Native Method)
+	at org.apache.hadoop.io.nativeio.NativeIO$Windows.access(NativeIO.java:817)
+	at org.apache.hadoop.fs.FileUtil.canRead(FileUtil.java:1415)
+	at org.apache.hadoop.fs.FileUtil.list(FileUtil.java:1620)
+	at org.apache.hadoop.fs.RawLocalFileSystem.listStatus(RawLocalFileSystem.java:802)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2079)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2123)
+	at org.apache.hadoop.fs.ChecksumFileSystem.listStatus(ChecksumFileSystem.java:1020)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2079)
+	at org.apache.hadoop.fs.FileSystem.listStatus(FileSystem.java:2123)
+	at org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter.getAllCommittedTaskPaths(FileOutputCommitter.java:339)
+	at org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter.commitJobInternal(FileOutputCommitter.java:409)
+	at org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter.commitJob(FileOutputCommitter.java:382)
+	at org.apache.parquet.hadoop.ParquetOutputCommitter.commitJob(ParquetOutputCommitter.java:46)
+	at org.apache.spark.internal.io.HadoopMapReduceCommitProtocol.commitJob(HadoopMapReduceCommitProtocol.scala:184)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.$anonfun$writeAndCommit$3(FileFormatWriter.scala:289)
+	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.scala:18)
+	at org.apache.spark.util.Utils$.timeTakenMs(Utils.scala:496)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.writeAndCommit(FileFormatWriter.scala:289)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.executeWrite(FileFormatWriter.scala:315)
+	at org.apache.spark.sql.execution.datasources.FileFormatWriter$.write(FileFormatWriter.scala:201)
+	at org.apache.spark.sql.execution.datasources.InsertIntoHadoopFsRelationCommand.run(InsertIntoHadoopFsRelationCommand.scala:195)
+	at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult$lzycompute(commands.scala:117)
+	at org.apache.spark.sql.execution.command.DataWritingCommandExec.sideEffectResult(commands.scala:115)
+	at org.apache.spark.sql.execution.command.DataWritingCommandExec.executeCollect(commands.scala:129)
+	at org.apache.spark.sql.execution.adaptive.AdaptiveSparkPlanExec.$anonfun$executeCollect$1(AdaptiveSparkPlanExec.scala:408)
+	at org.apache.spark.sql.execution.adaptive.ResultQueryStageExec.$anonfun$doMaterialize$1(QueryStageExec.scala:328)
+	at org.apache.spark.sql.execution.SQLExecutionThreadLocalCaptured.$anonfun$runWith$2(SQLExecution.scala:63)
+	at org.apache.spark.sql.execution.SQLExecution$.withSessionTagsApplied(SQLExecution.scala:352)
+	at org.apache.spark.sql.execution.SQLExecutionThreadLocalCaptured.$anonfun$runWith$1(SQLExecution.scala:61)
+	at org.apache.spark.JobArtifactSet$.withActiveJobArtifactState(JobArtifactSet.scala:94)
+	at org.apache.spark.sql.execution.SQLExecutionThreadLocalCaptured.runWith(SQLExecution.scala:57)
+	at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withThreadLocalCaptured$1(SQLExecution.scala:401)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	... 1 more
+
+2026-10-26 11:16:21,422 | INFO | __main__ | Stopping Spark session
+2026-10-26 11:16:21,747 | INFO | __main__ | Spark session stopped
+2026-10-26 11:16:21,760 | INFO | py4j.clientserver | Closing down clientserver connection
